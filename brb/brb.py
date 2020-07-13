@@ -51,6 +51,19 @@ class Rule():
 
         return np.prod(weighted_alpha)
 
+    def get_belief_degrees_complete(self, X: AttributeInput) -> Dict[Any, Any]:
+        """Returns belief degress transformed based on input completeness
+        """
+        self._assert_input(X)
+
+        attribute_total_activations = {attr: sum(X.attr_input[attr]) for attr in X.attr_input.keys()}
+
+        rule_input_completeness = sum([attribute_total_activations[attr] for attr in self.A_values.keys()]) / len(self.A_values.keys())
+
+        norm_beta = {consequent: belief * rule_input_completeness for consequent, belief in self.beta.items()}
+
+        return norm_beta
+
     def _assert_input(self, X: AttributeInput):
         """Checks if `X` is proper.
 
@@ -109,6 +122,12 @@ class RuleBaseModel():
         for U_i in X.attr_input.keys():
             assert U_i in self.U
 
-        # matching degree
+        # 2. matching degree
         alpha = [rule.get_matching_degree(X) for rule in self.rules]
 
+        # 3. activation weight
+        total_theta_alpha = sum([rule.theta*alpha_k for rule, alpha_k in zip(self.rules, alpha)])
+        activation_weight = [rule.theta * alpha_k / total_theta_alpha for rule, alpha_k in zip(self.rules, alpha)]
+
+        # 4. degrees of belief
+        normalized_belief_degrees = [rule.get_belief_degrees_complete(X) for rule in self.rules]
