@@ -9,7 +9,7 @@ class AttributeInput():
     Consists of a set of antecedent attribute values and degrees of belief.
 
     Attributes:
-        attr_input: A^*. Relates antecedent attributes with values and belief degrees.
+        attr_input: X. Relates antecedent attributes with values and belief degrees.
     """
 
     def __init__(self, attr_input: Dict[str, Tuple[Any, float]]):
@@ -73,7 +73,6 @@ class Rule():
         input_attributes = set(X.attr_input.keys())
         assert rule_attributes.intersection(input_attributes) == rule_attributes
 
-
 class RuleBaseModel():
     """Parameters for the model.
     
@@ -123,11 +122,22 @@ class RuleBaseModel():
             assert U_i in self.U
 
         # 2. matching degree
-        alpha = [rule.get_matching_degree(X) for rule in self.rules]
+        # alphas[k] = \alpha_k = matching degree of k-th rule
+        alphas = [rule.get_matching_degree(X) for rule in self.rules]
 
         # 3. activation weight
-        total_theta_alpha = sum([rule.theta*alpha_k for rule, alpha_k in zip(self.rules, alpha)])
-        activation_weight = [rule.theta * alpha_k / total_theta_alpha for rule, alpha_k in zip(self.rules, alpha)]
+        total_theta_alpha = sum([rule.theta*alpha_k for rule, alpha_k in zip(self.rules, alphas)])
+        # activation_weights[k] = w_k = activation weight of the k-th rule
+        activation_weights = [rule.theta * alpha_k / total_theta_alpha for rule, alpha_k in zip(self.rules, alphas)]
 
         # 4. degrees of belief
+        # normalized_belief_degrees[k][j] = \beta_jk = normalized belief degree for k-th rule, j-th consequent
         normalized_belief_degrees = [rule.get_belief_degrees_complete(X) for rule in self.rules]
+
+        # 5. probability masses
+        # probability_masses[k][j] = m_jk = probability mass of k-th rule, j-th consequent
+        probability_masses = [rule_weight * rule_belief_degrees for rule_weight, rule_belief_degrees in zip(activation_weights, normalized_belief_degrees)]
+        # relative_importance_masses[k] = \bar{m}_Dk = relative importance probability mass of k-th rule
+        relative_importance_masses = [1 - weight for weight in activation_weights]
+        # incompleteness_masses[k] = \tilde{m}_Dk = incompleteness probablity mass of k-th rule
+        incompleteness_masses = [weight_k * (1 - sum(belief_degrees_k)) for weight_k, belief_degrees_k in zip(activation_weights, normalized_belief_degrees)]
