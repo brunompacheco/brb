@@ -104,7 +104,7 @@ class RuleBaseModel():
         Verifies if the given rule agrees with the model settings and adds it to `.rules`.
         """
         # all reference values must be related to an attribute
-        assert new_rule.A_values.keys() in self.U
+        assert set(new_rule.A_values.keys()) in set(self.U)
 
         # the reference values that activate the rule must be a valid referential value in the self
         for U_i, A_i in new_rule.A_values.items():
