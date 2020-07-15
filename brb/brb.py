@@ -137,7 +137,32 @@ class RuleBaseModel():
         # 5. probability masses
         # probability_masses[k][j] = m_jk = probability mass of k-th rule, j-th consequent
         probability_masses = [rule_weight * rule_belief_degrees for rule_weight, rule_belief_degrees in zip(activation_weights, normalized_belief_degrees)]
+        # unassigned_masses[k] = m_Dk = unassigned probability mass of k-th rule
+        unassigned_masses = [1 - sum(probability_masses_k) for probability_masses_k in probability_masses]
         # relative_importance_masses[k] = \bar{m}_Dk = relative importance probability mass of k-th rule
         relative_importance_masses = [1 - weight for weight in activation_weights]
         # incompleteness_masses[k] = \tilde{m}_Dk = incompleteness probablity mass of k-th rule
         incompleteness_masses = [weight_k * (1 - sum(belief_degrees_k)) for weight_k, belief_degrees_k in zip(activation_weights, normalized_belief_degrees)]
+
+        # this must be true by definition
+        assert unassigned_masses == [bar_m + tilde_m for bar_m, tilde_m in zip(relative_importance_masses, incompleteness_masses)]
+
+        # 6. ER algorithm
+        from itertools import product
+        m_I = probability_masses[0]
+        importance_m_I = relative_importance_masses[0]
+        incompleteness_m_I = incompleteness_masses[0]
+        for k in range(len(self.rules) - 1):
+            K_I = 1 / (1 - [a + b for a, b in product(m_I, probability_masses[k+1])])
+
+            importance_m_I = K_I * (importance_m_I * relative_importance_masses[k+1])
+            incompleteness_m_I = K_I * (incompleteness_m_I * incompleteness_masses[k+1] + incompleteness_m_I * relative_importance_masses[k+1] + importance_m_I * incompleteness_masses[k+1])
+            m_DI = importance_m_I + incompleteness_m_I
+            m_I = [K_I * (m_jI * m_j + m_jI * m_DI + m_DI * m_j) for m_jI, m_j in zip(m_I, probability_masses[k+1])]
+
+        belief_degrees = [m_jI / (1 - importance_m_I) for m_jI in m_I]
+        remaining_belief_degree = incompleteness_m_I / (1 - importance_m_I)
+
+        # TODO: add utility calculation
+
+        return belief_degrees, remaining_belief_degree
