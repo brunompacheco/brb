@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Tuple, Any
 
 import numpy as np
 
@@ -23,7 +23,6 @@ class Rule():
     It translates expert knowledge into a mapping between the antecedents and the consequents. We assume that it is defined as a pure AND rules, that is, the only logical relation between the input attributes is the AND function.
 
     Attributes:
-        model: The rule-base model to which this rule should apply to.
         A_values: A^k. Dictionary that matches reference values for each antecedent attribute that activates the rule.
         delta: \delta_k. Relative weights of antecedent attributes.
         theta: \theta_k. Rule weight.
@@ -86,8 +85,14 @@ class RuleBaseModel():
         rules: List of rules.
     """
     def __init__(self, U: List[str], A: Dict[str, List[Any]], D: List[Any], F):
+        # no repeated elements for U
+        assert len(U) == len(set(U))
         self.U = U
+
+        # referential values for all antecedent attributes must be provided
+        assert set(U) == set(A.keys())
         self.A = A
+
         self.D = D
         self.F = F
 
