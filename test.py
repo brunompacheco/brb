@@ -21,12 +21,12 @@ if __name__ == "__main__":
     ))
 
     X = AttributeInput({
-        'Antecedant': ('good', 1.0)
+        'Antecedant': [1.0, 0]
     })
     belief_degrees, remaining_belief_degree = model.run(X)
 
     X = AttributeInput({
-        'Antecedant': ('bad', 1.0)
+        'Antecedant': [0, 1.0]
     })
     belief_degrees, remaining_belief_degree = model.run(X)
     pass

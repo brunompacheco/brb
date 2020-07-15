@@ -9,10 +9,10 @@ class AttributeInput():
     Consists of a set of antecedent attribute values and degrees of belief.
 
     Attributes:
-        attr_input: X. Relates antecedent attributes with values and belief degrees.
+        attr_input: X. Relates antecedent attributes with values and belief degrees. Must follow same order of reference values as in the model.
     """
 
-    def __init__(self, attr_input: Dict[str, Tuple[Any, float]]):
+    def __init__(self, attr_input: Dict[str, List[float]]):
         self.attr_input = attr_input
 
     # TODO: add transformation methods
@@ -46,7 +46,7 @@ class Rule():
         self._assert_input(X)
 
         norm_delta = {attr: d / max(self.delta.values()) for attr, d in self.delta.items()}
-        weighted_alpha = [X.attr_input[attr] ^ norm_delta[attr] for attr in self.A_values.keys()]
+        weighted_alpha = [[X_i ** norm_delta[attr] for X_i in X.attr_input[attr]] for attr in self.A_values.keys()]
 
         return np.prod(weighted_alpha)
 
@@ -104,7 +104,7 @@ class RuleBaseModel():
         Verifies if the given rule agrees with the model settings and adds it to `.rules`.
         """
         # all reference values must be related to an attribute
-        assert set(new_rule.A_values.keys()) in set(self.U)
+        assert set(new_rule.A_values.keys()) == set(self.U)
 
         # the reference values that activate the rule must be a valid referential value in the self
         for U_i, A_i in new_rule.A_values.items():
