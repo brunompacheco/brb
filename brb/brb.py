@@ -131,44 +131,22 @@ class RuleBaseModel():
         # activation_weights[k] = w_k = activation weight of the k-th rule
         activation_weights = [rule.theta * alpha_k / total_theta_alpha for rule, alpha_k in zip(self.rules, alphas)]
 
-        # 4. degrees of belief
-        # normalized_belief_degrees[k][j] = \beta_jk = normalized belief degree for k-th rule, j-th consequent
-        normalized_belief_degrees = [rule.get_belief_degrees_complete(X) for rule in self.rules]
+        # 4. analytical ER algorithm
+        # the following is based on "Inference and learning methodology of belief-rule-based expert system for pipeline leak detection", _Xu et al._
+        belief_degrees = [rule.beta for rule in self.rules]
+        total_belief_degrees = [sum(beta_k) for beta_k in belief_degrees]
+        left_prods = list()
+        for rules_beta_j in map(list, zip(*belief_degrees)):  # transpose belief degrees
+            left_prods.append(np.prod(
+                [weight_k * rules_beta_jk + 1 - weight_k * total_belief_degrees_k for weight_k, rules_beta_jk, total_belief_degrees_k in zip(activation_weights, rules_beta_j, total_belief_degrees)]
+            ))
+        right_prod = np.prod(
+            [1 - weight_k * total_belief_degrees_k for weight_k, total_belief_degrees_k in zip(activation_weights, total_belief_degrees)]
+        )
+        mi = 1 / (sum(left_prods) - (len(self.D) - 1) * right_prod)
 
-        # 5. probability masses
-        # probability_masses[k][j] = m_jk = probability mass of k-th rule, j-th consequent
-        probability_masses = [[rule_weight * rule_belief_degree for rule_belief_degree in rule_belief_degrees] for rule_weight, rule_belief_degrees in zip(activation_weights, normalized_belief_degrees)]
-        # unassigned_masses[k] = m_Dk = unassigned probability mass of k-th rule
-        unassigned_masses = [1 - sum(probability_masses_k) for probability_masses_k in probability_masses]
-        # relative_importance_masses[k] = \bar{m}_Dk = relative importance probability mass of k-th rule
-        relative_importance_masses = [1 - weight for weight in activation_weights]
-        # incompleteness_masses[k] = \tilde{m}_Dk = incompleteness probablity mass of k-th rule
-        incompleteness_masses = [weight_k * (1 - sum(belief_degrees_k)) for weight_k, belief_degrees_k in zip(activation_weights, normalized_belief_degrees)]
-
-        # this must be true by definition
-        assert unassigned_masses == [bar_m + tilde_m for bar_m, tilde_m in zip(relative_importance_masses, incompleteness_masses)]
-
-        # 6. ER algorithm
-        from itertools import product
-        m_I = probability_masses[0]
-        importance_m_I = relative_importance_masses[0]
-        incompleteness_m_I = incompleteness_masses[0]
-        for k in range(len(self.rules) - 1):
-            np_m_I = np.matrix(m_I)
-            np_probability_masses_k_1 = np.matrix(probability_masses[k+1])
-            probability_masses_combination = np_m_I.T @ np_probability_masses_k_1
-            np.fill_diagonal(probability_masses_combination, 0)  # in the algorithm, t != j
-            probability_masses_combination = np.sum(probability_masses_combination)
-            K_I = 1 / (1 - probability_masses_combination)
-
-            importance_m_I = K_I * (importance_m_I * relative_importance_masses[k+1])
-            incompleteness_m_I = K_I * (incompleteness_m_I * incompleteness_masses[k+1] + incompleteness_m_I * relative_importance_masses[k+1] + importance_m_I * incompleteness_masses[k+1])
-            m_DI = importance_m_I + incompleteness_m_I
-            m_I = [K_I * (m_jI * m_j + m_jI * m_DI + m_DI * m_j) for m_jI, m_j in zip(m_I, probability_masses[k+1])]
-
-        belief_degrees = [m_jI / (1 - importance_m_I) for m_jI in m_I]
-        remaining_belief_degree = incompleteness_m_I / (1 - importance_m_I)
+        belief_degrees = [mi * (left_prod - right_prod) / (1 - mi * np.prod([1 - weight_k for weight_k in activation_weights])) for left_prod in left_prods]
 
         # TODO: add utility calculation
 
-        return belief_degrees, remaining_belief_degree
+        return belief_degrees
