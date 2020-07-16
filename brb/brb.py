@@ -137,7 +137,7 @@ class RuleBaseModel():
 
         # 5. probability masses
         # probability_masses[k][j] = m_jk = probability mass of k-th rule, j-th consequent
-        probability_masses = [rule_weight * rule_belief_degrees for rule_weight, rule_belief_degrees in zip(activation_weights, normalized_belief_degrees)]
+        probability_masses = [[rule_weight * rule_belief_degree for rule_belief_degree in rule_belief_degrees] for rule_weight, rule_belief_degrees in zip(activation_weights, normalized_belief_degrees)]
         # unassigned_masses[k] = m_Dk = unassigned probability mass of k-th rule
         unassigned_masses = [1 - sum(probability_masses_k) for probability_masses_k in probability_masses]
         # relative_importance_masses[k] = \bar{m}_Dk = relative importance probability mass of k-th rule
@@ -154,7 +154,12 @@ class RuleBaseModel():
         importance_m_I = relative_importance_masses[0]
         incompleteness_m_I = incompleteness_masses[0]
         for k in range(len(self.rules) - 1):
-            K_I = 1 / (1 - [a + b for a, b in product(m_I, probability_masses[k+1])])
+            np_m_I = np.matrix(m_I)
+            np_probability_masses_k_1 = np.matrix(probability_masses[k+1])
+            probability_masses_combination = np_m_I.T @ np_probability_masses_k_1
+            np.fill_diagonal(probability_masses_combination, 0)  # in the algorithm, t != j
+            probability_masses_combination = np.sum(probability_masses_combination)
+            K_I = 1 / (1 - probability_masses_combination)
 
             importance_m_I = K_I * (importance_m_I * relative_importance_masses[k+1])
             incompleteness_m_I = K_I * (incompleteness_m_I * incompleteness_masses[k+1] + incompleteness_m_I * relative_importance_masses[k+1] + importance_m_I * incompleteness_masses[k+1])
