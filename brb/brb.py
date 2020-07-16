@@ -11,14 +11,10 @@ approach.
     >>> model = RuleBaseModel(U=['Antecedent'], A={'Antecedent': ['good', 'bad']}, D=['good', 'bad'])
     >>> model.add_rule(Rule(
     ...     A_values={'Antecedent':'good'},
-    ...     delta={'Antecedent':1},
-    ...     theta=1,
     ...     beta=[1,0]
     ... ))
     >>> model.add_rule(Rule(
     ...     A_values={'Antecedent':'bad'},
-    ...     delta={'Antecedent':1},
-    ...     theta=1,
     ...     beta=[0,1]
     ... ))
     >>> X = AttributeInput({'Antecedent': {'good': 1, 'bad': 0}})
@@ -58,21 +54,25 @@ class Rule():
     Attributes:
         A_values: A^k. Dictionary that matches reference values for each
         antecedent attribute that activates the rule.
-        delta: \delta_k. Relative weights of antecedent attributes.
-        theta: \theta_k. Rule weight.
         beta: \bar{\beta}. Expected belief degrees of consequents if rule is
+        delta: \delta_k. Relative weights of antecedent attributes. If not
+        provided, 1 will be set for all attributes.
+        theta: \theta_k. Rule weight.
         (completely) activated.
     """
 
-    def __init__(self, A_values: Dict[str, Any], delta: Dict[str, float],
-                 theta: float, beta: List[float]):
+    def __init__(self, A_values: Dict[str, Any], beta: List[float],
+                 delta: Dict[str, float] = None, theta: float = 1):
         self.A_values = A_values
 
-        # there must exist a weight for all antecedent attributes that activate
-        # the rule
-        for U_i in A_values.keys():
-            assert U_i in delta.keys()
-        self.delta = delta
+        if delta is None:
+            self.delta = {attr: 1 for attr in A_values.keys()}
+        else:
+            # there must exist a weight for all antecedent attributes that
+            # activate the rule
+            for U_i in A_values.keys():
+                assert U_i in delta.keys()
+            self.delta = delta
 
         self.theta = theta
         self.beta = beta
