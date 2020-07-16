@@ -51,7 +51,7 @@ if __name__ == "__main__":
         }
     })
     belief_degrees = model.run(X)
-    # assert all(np.isclose(belief_degrees, [0.5, 0.0]))
+    assert all(np.isclose(belief_degrees, [0.5, 0.0]))
 
     X = AttributeInput({
         'Antecedent': {
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         }
     })
     belief_degrees = model.run(X)
-    # assert all(np.isclose(belief_degrees, [0.0, 0.5]))
+    assert all(np.isclose(belief_degrees, [0.0, 0.5]))
 
     X = AttributeInput({
         'Antecedent': {

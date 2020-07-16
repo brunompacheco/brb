@@ -181,11 +181,14 @@ class RuleBaseModel():
         activation_weights = [rule.theta * alpha_k / total_theta_alpha
                               for rule, alpha_k in zip(self.rules, alphas)]
 
-        # 4. analytical ER algorithm
+        # 4. degrees of belief
+        # use normalized belief degrees to compensate for incompleteness
+        belief_degrees = [rule.get_belief_degrees_complete(X) for rule in self.rules]
+
+        # 5. analytical ER algorithm
         # the following is based on "Inference and learning methodology of
         # belief-rule-based expert system for pipeline leak detection" by
         # _Xu et al._
-        belief_degrees = [rule.beta for rule in self.rules]
         total_belief_degrees = [sum(beta_k) for beta_k in belief_degrees]
         left_prods = list()
         # transpose belief degrees
