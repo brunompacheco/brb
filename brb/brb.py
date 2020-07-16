@@ -12,7 +12,7 @@ class AttributeInput():
         attr_input: X. Relates antecedent attributes with values and belief degrees. Must follow same order of reference values as in the model.
     """
 
-    def __init__(self, attr_input: Dict[str, List[float]]):
+    def __init__(self, attr_input: Dict[str, Dict[Any, float]]):
         self.attr_input = attr_input
 
     # TODO: add transformation methods
@@ -29,7 +29,7 @@ class Rule():
         beta: \bar{\beta}. Expected belief degrees of consequents if rule is (completely) activated.
     """
 
-    def __init__(self, A_values: Dict[str, Any], delta: Dict[str, float], theta: float, beta: Dict[Any, Any]):
+    def __init__(self, A_values: Dict[str, Any], delta: Dict[str, float], theta: float, beta: List[float]):
         self.A_values = A_values
 
         # there must exist a weight for all antecedent attributes that activate the rule
@@ -46,7 +46,7 @@ class Rule():
         self._assert_input(X)
 
         norm_delta = {attr: d / max(self.delta.values()) for attr, d in self.delta.items()}
-        weighted_alpha = [[X_i ** norm_delta[attr] for X_i in X.attr_input[attr]] for attr in self.A_values.keys()]
+        weighted_alpha = [[alpha_i ** norm_delta[attr] for A_i, alpha_i in X.attr_input[attr].items() if A_i == self.A_values[attr]] for attr in self.A_values.keys()]
 
         return np.prod(weighted_alpha)
 
@@ -55,11 +55,11 @@ class Rule():
         """
         self._assert_input(X)
 
-        attribute_total_activations = {attr: sum(X.attr_input[attr]) for attr in X.attr_input.keys()}
+        attribute_total_activations = {attr: sum(X.attr_input[attr].values()) for attr in X.attr_input.keys()}
 
         rule_input_completeness = sum([attribute_total_activations[attr] for attr in self.A_values.keys()]) / len(self.A_values.keys())
 
-        norm_beta = {consequent: belief * rule_input_completeness for consequent, belief in self.beta.items()}
+        norm_beta = [belief * rule_input_completeness for belief in self.beta]
 
         return norm_beta
 
@@ -109,10 +109,6 @@ class RuleBaseModel():
         # the reference values that activate the rule must be a valid referential value in the self
         for U_i, A_i in new_rule.A_values.items():
             assert A_i in self.A[U_i]
-
-        # the belief degrees must be applied to values defined by the self
-        for D_n in new_rule.beta.keys():
-            assert D_n in self.D
 
         self.rules.append(new_rule)
 
