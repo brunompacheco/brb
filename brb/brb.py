@@ -83,6 +83,10 @@ class Rule():
 
     def get_matching_degree(self, X: AttributeInput) -> float:
         """Calculates the matching degree of the rule based on input `X`.
+
+        Implementation based on the RIMER approach as proposed by _Yang et al._
+        in "Belief rule-base inference methodology using the evidential
+        reasoning Approach-RIMER", specifically eq. (6a).
         """
         self._assert_input(X)
 
@@ -98,9 +102,14 @@ class Rule():
 
     def get_belief_degrees_complete(self, X: AttributeInput) -> Dict[Any, Any]:
         """Returns belief degrees transformed based on input completeness
+
+        Implementation based on the RIMER approach as proposed by _Yang et al._
+        in "Belief rule-base inference methodology using the evidential
+        reasoning Approach-RIMER", specifically eq. (8).
         """
         self._assert_input(X)
 
+        # sum of activations of the referential values for each antecedent
         attribute_total_activations = {attr: sum(X.attr_input[attr].values())
                                        for attr in X.attr_input.keys()}
 
@@ -224,6 +233,15 @@ class RuleBaseModel():
     def run(self, X: AttributeInput):
         """Infer the output based on the RIMER approach.
 
+        Based on the approach of "Inference and learning methodology of
+        belief-rule-based expert system for pipeline leak detection" by
+        _Xu et al._. Matching degrees and activation weights for all the rules
+        are calculated first. An addition done in this implementation is the
+        normalization of belief degrees once it was noticed that without this,
+        the incompleteness in the input wouldn't be reflected in the resulting
+        belief degrees. Finally, the final belief degrees are calculated from
+        the analytical ER algorithm.
+
         Args:
             X: Attribute's data to be fed to the rules.
         """
@@ -236,9 +254,15 @@ class RuleBaseModel():
         alphas = [rule.get_matching_degree(X) for rule in self.rules]
 
         # 3. activation weight
+        # implementation based on eq. (7) of "Belief rule-base inference
+        # methodology using the evidential reasoning Approach-RIMER", by
+        # _Yang et al._
+
+        # total_theta_alpha is the sum on the denominator of said equation
         total_theta_alpha = sum([rule.theta*alpha_k for rule, alpha_k
                                  in zip(self.rules, alphas)])
         total_theta_alpha = total_theta_alpha if total_theta_alpha != 0 else 1
+
         # activation_weights[k] = w_k = activation weight of the k-th rule
         activation_weights = [rule.theta * alpha_k / total_theta_alpha
                               for rule, alpha_k in zip(self.rules, alphas)]
@@ -249,32 +273,38 @@ class RuleBaseModel():
                           in self.rules]
 
         # 5. analytical ER algorithm
-        # the following is based on "Inference and learning methodology of
-        # belief-rule-based expert system for pipeline leak detection" by
-        # _Xu et al._
+
+        # sum of all belief degrees over the rules
         total_belief_degrees = [sum(beta_k) for beta_k in belief_degrees]
+
+        # left_prods is the productory that appears both in the left-side
+        # of the numerator of eq. (4) and in \mu. Note that this depends on j
         left_prods = list()
-        # transpose belief degrees
+        # map is a transposition of belief_degrees
         for rules_beta_j in map(list, zip(*belief_degrees)):
             left_prods.append(np.prod(
                 [weight_k * rules_beta_jk + 1 - weight_k * total_belief_degrees_k  # pylint: disable=line-too-long
                  for weight_k, rules_beta_jk, total_belief_degrees_k
                  in zip(activation_weights, rules_beta_j, total_belief_degrees)]
             ))
+        # the productory that appears in the right side of the numerator of eq.
+        # (4) and in \mu
         right_prod = np.prod(
             [1 - weight_k * total_belief_degrees_k
              for weight_k, total_belief_degrees_k
              in zip(activation_weights, total_belief_degrees)]
         )
-        mi = 1 / (sum(left_prods) - (len(self.D) - 1) * right_prod)
+        mu = 1 / (sum(left_prods) - (len(self.D) - 1) * right_prod)
 
-        belief_degrees = [mi * (left_prod - right_prod) / (1 - mi * \
+        # eq. (4)
+        belief_degrees = [mu * (left_prod - right_prod) / (1 - mu * \
                           np.prod([1 - weight_k for weight_k
                                    in activation_weights]))
                           for left_prod in left_prods]
 
+        # handles the case where there is 0 certainty, i.e., completely 0 input
         if all(np.isnan(belief_degrees)):
-            belief_degrees = [mi * (left_prod - right_prod) for left_prod
+            belief_degrees = [mu * (left_prod - right_prod) for left_prod
                               in left_prods]
 
         # TODO: add utility calculation
