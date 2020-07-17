@@ -177,6 +177,7 @@ class RuleBaseModel():
         # 3. activation weight
         total_theta_alpha = sum([rule.theta*alpha_k for rule, alpha_k
                                  in zip(self.rules, alphas)])
+        total_theta_alpha = total_theta_alpha if total_theta_alpha != 0 else 1
         # activation_weights[k] = w_k = activation weight of the k-th rule
         activation_weights = [rule.theta * alpha_k / total_theta_alpha
                               for rule, alpha_k in zip(self.rules, alphas)]
@@ -209,6 +210,11 @@ class RuleBaseModel():
                           np.prod([1 - weight_k for weight_k
                                    in activation_weights]))
                           for left_prod in left_prods]
+
+        if all(np.isnan(belief_degrees)):
+            belief_degrees = [mi * (left_prod - right_prod) for left_prod
+                              in left_prods]
+            
 
         # TODO: add utility calculation
 

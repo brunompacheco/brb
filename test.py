@@ -4,7 +4,7 @@ from brb.brb import RuleBaseModel, Rule, AttributeInput
 if __name__ == "__main__":
     U = ['Antecedent']
     A = {'Antecedent': ['good', 'bad']}
-    D = ['bad', 'good']
+    D = ['good', 'bad']
     model = RuleBaseModel(U=U, A=A, D=D, F=None)
 
     model.add_rule(Rule(
@@ -16,6 +16,38 @@ if __name__ == "__main__":
         A_values={'Antecedent':'bad'},
         beta=[0, 1]  # completely bad
     ))
+
+    X = AttributeInput({
+        'Antecedent': {
+            'good': 0,
+            'bad': 0
+        }
+    })
+    belief_degrees = model.run(X)
+    assert all(np.isclose(belief_degrees, [0.0, 0.0]))
+
+    X_1 = AttributeInput({
+        'Antecedent': {
+            'good': 0.01,
+            'bad': 0.01
+        }
+    })
+    X_2 = AttributeInput({
+        'Antecedent': {
+            'good': 0.0001,
+            'bad': 0.0001
+        }
+    })
+    X_3 = AttributeInput({
+        'Antecedent': {
+            'good': 0.000001,
+            'bad': 0.000001
+        }
+    })
+    assert all(
+        model.run(X_1) > model.run(X_2)
+        and model.run(X_2) > model.run(X_3)
+        and [belief_degree >= 0.0 for belief_degree in model.run(X_3)])
 
     X = AttributeInput({
         'Antecedent': {
