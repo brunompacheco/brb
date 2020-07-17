@@ -102,4 +102,24 @@ if __name__ == "__main__":
     })
     belief_degrees = model.run(X)
 
+    model = RuleBaseModel(
+        U=['A_1', 'A_2'],
+        A={
+            'A_1': ['high', 'low'],
+            'A_2': ['large', 'medium', 'small']
+        },
+        D=['RS', 'GP']
+    )
+
+    A_ks = np.matrix([
+        ['high', 'small'],
+        ['high', 'medium'],
+        ['high', 'large'],
+        ['low', 'small'],
+        ['low', 'medium'],
+        ['low', 'large']
+    ])
+    betas = np.matrix(['RS', 'GP', 'GP', 'RS', 'RS', 'GP']).T
+    model.add_rules_from_matrix(A_ks=A_ks, betas=betas)
+
     print('Success!')

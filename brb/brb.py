@@ -8,7 +8,11 @@ approach.
     Typical usage example:
 
     >>> from brb.brb import RuleBaseModel, Rule, AttributeInput
-    >>> model = RuleBaseModel(U=['Antecedent'], A={'Antecedent': ['good', 'bad']}, D=['good', 'bad'])
+    >>> model = RuleBaseModel(
+    ...     U=['Antecedent'],
+    ...     A={'Antecedent': ['good', 'bad']},
+    ...     D=['good', 'bad']
+    ... )
     >>> model.add_rule(Rule(
     ...     A_values={'Antecedent':'good'},
     ...     beta=[1,0]
@@ -130,7 +134,8 @@ class RuleBaseModel():
         F: ?
         rules: List of rules.
     """
-    def __init__(self, U: List[str], A: Dict[str, List[Any]], D: List[Any], F=None):
+    def __init__(self, U: List[str], A: Dict[str, List[Any]], D: List[Any],
+                 F=None):
         # no repeated elements for U
         assert len(U) == len(set(U))
         self.U = U
@@ -158,7 +163,63 @@ class RuleBaseModel():
         for U_i, A_i in new_rule.A_values.items():
             assert A_i in self.A[U_i]
 
+        # TODO: handle NaN values
+
         self.rules.append(new_rule)
+
+    def add_rules_from_matrix(self, A_ks: np.matrix, betas: np.array,
+                              deltas: np.matrix = None, thetas: np.array = None):
+        """Adds several rules through the input matrices.
+
+        Args:
+            A_ks: Rules antecedents referential values matrix. Each row is a
+            rule and the columns are the antecedents, so the matrix values must
+            be the referential values according to the model.
+            betas: Consequent referential values.
+            deltas: Attribute weights of the rules. Must have the same shape as
+            A_ks. If `None` (default value), equal weight (1) is given for all
+            attributes over all rules.
+            thetas: Rules weights. If `None` (default value), same weight is
+            given for all rules (1).
+        """
+        # the number of rules must be consistent
+        assert A_ks.shape[0] == len(betas)
+
+        # every rule must comply to the amount of antecedent attributes
+        assert A_ks.shape[1] == len(self.U)
+
+        # the values in the matrix must comply to the referential values in the
+        # model
+        for A_i, A_ref in zip(A_ks.T, self.A.values()):
+            assert np.isin(A_i, A_ref).all()
+
+        # same is true for the consequents
+        assert np.isin(betas, self.D).all()
+
+        if deltas is None:
+            # all antecedents have the same weight
+            deltas = A_ks.shape[0] * [None, ]
+
+        # there must be a weight for every antecedent for every rule
+        assert len(deltas) == A_ks.shape[0]
+        # TODO: deltas' rows must either be same size as A_ks' or None
+
+        if thetas is None:
+            # all rules have the sae weight
+            thetas = np.ones(A_ks.shape[0])
+
+        # there must be a weight for every rule
+        assert len(thetas) == A_ks.shape[0]
+
+        for A_k, beta, delta, theta in zip(A_ks, betas, deltas, thetas):
+            A_values = {U_i: A_k_value for U_i, A_k_value
+                        in zip(self.U, A_k.tolist()[0])}
+            self.add_rule(Rule(A_values=A_values, beta=beta.tolist()[0],
+                               delta=delta, theta=theta))
+
+    # TODO: add get_ function that returns the full rules matrix (all
+    # combination of antecedent attributes' values) as a boilerplate for
+    # defining the full set of rules.
 
     def run(self, X: AttributeInput):
         """Infer the output based on the RIMER approach.
@@ -184,7 +245,8 @@ class RuleBaseModel():
 
         # 4. degrees of belief
         # use normalized belief degrees to compensate for incompleteness
-        belief_degrees = [rule.get_belief_degrees_complete(X) for rule in self.rules]
+        belief_degrees = [rule.get_belief_degrees_complete(X) for rule
+                          in self.rules]
 
         # 5. analytical ER algorithm
         # the following is based on "Inference and learning methodology of
@@ -214,7 +276,6 @@ class RuleBaseModel():
         if all(np.isnan(belief_degrees)):
             belief_degrees = [mi * (left_prod - right_prod) for left_prod
                               in left_prods]
-            
 
         # TODO: add utility calculation
 
