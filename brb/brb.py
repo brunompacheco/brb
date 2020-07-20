@@ -166,7 +166,7 @@ class RuleBaseModel():
         to `.rules`.
         """
         # all reference values must be related to an attribute
-        assert set(new_rule.A_values.keys()) == set(self.U)
+        assert set(new_rule.A_values.keys()).issubset(set(self.U))
 
         # the reference values that activate the rule must be a valid
         # referential value in the self
