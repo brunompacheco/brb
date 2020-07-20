@@ -2,6 +2,7 @@ import numpy as np
 from brb.brb import RuleBaseModel, Rule, AttributeInput
 
 if __name__ == "__main__":
+    # setup for simple tests
     U = ['Antecedent']
     A = {'Antecedent': ['good', 'bad']}
     D = ['good', 'bad']
@@ -17,6 +18,7 @@ if __name__ == "__main__":
         beta=[0, 1]  # completely bad
     ))
 
+    # vanishing input
     X = AttributeInput({
         'Antecedent': {
             'good': 0,
@@ -49,6 +51,7 @@ if __name__ == "__main__":
         and model.run(X_2) > model.run(X_3)
         and [belief_degree >= 0.0 for belief_degree in model.run(X_3)])
 
+    # certain, complete input
     X = AttributeInput({
         'Antecedent': {
             'good': 1.0,
@@ -67,6 +70,7 @@ if __name__ == "__main__":
     belief_degrees = model.run(X)
     assert all(np.isclose(belief_degrees, [0.0, 1.0]))
 
+    # even, complete input
     X = AttributeInput({
         'Antecedent': {
             'good': 0.5,
@@ -76,6 +80,7 @@ if __name__ == "__main__":
     belief_degrees = model.run(X)
     assert all(np.isclose(belief_degrees, [0.5, 0.5]))
 
+    # uncertain, incomplete, uneven input
     X = AttributeInput({
         'Antecedent': {
             'good': 0.5,
@@ -94,6 +99,7 @@ if __name__ == "__main__":
     belief_degrees = model.run(X)
     assert all(np.isclose(belief_degrees, [0.0, 0.5]))
 
+    # uncertain, uneven input
     X = AttributeInput({
         'Antecedent': {
             'good': 0.3,
@@ -102,6 +108,7 @@ if __name__ == "__main__":
     })
     belief_degrees = model.run(X)
 
+    # matrix input
     model = RuleBaseModel(
         U=['A_1', 'A_2'],
         A={
