@@ -31,6 +31,7 @@ approach.
 from typing import List, Dict, Any
 
 import numpy as np
+import pandas as pd
 
 
 class AttributeInput():
@@ -191,6 +192,9 @@ class RuleBaseModel():
             thetas: Rules weights. If `None` (default value), same weight is
             given for all rules (1).
         """
+        # TODO: add support for uncertainty and incompleteness in the rule
+        # definition for both antecedents and consequents
+
         # the number of rules must be consistent
         assert A_ks.shape[0] == len(betas)
 
@@ -200,6 +204,7 @@ class RuleBaseModel():
         # the values in the matrix must comply to the referential values in the
         # model
         for A_i, A_ref in zip(A_ks.T, self.A.values()):
+            A_i = A_i[~pd.isna(A_i.tolist())]  # drops nan values
             assert np.isin(A_i, A_ref).all()
 
         # same is true for the consequents
@@ -221,8 +226,10 @@ class RuleBaseModel():
         assert len(thetas) == A_ks.shape[0]
 
         for A_k, beta, delta, theta in zip(A_ks, betas, deltas, thetas):
+            # converst to dict and drops nan values
+            A_k = np.asarray(A_k)[0]
             A_values = {U_i: A_k_value for U_i, A_k_value
-                        in zip(self.U, A_k.tolist()[0])}
+                        in zip(self.U, A_k) if not pd.isna(A_k_value)}
             self.add_rule(Rule(A_values=A_values, beta=beta.tolist()[0],
                                delta=delta, theta=theta))
 
