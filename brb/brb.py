@@ -177,7 +177,7 @@ class RuleBaseModel():
 
         self.rules.append(new_rule)
 
-    def add_rules_from_matrix(self, A_ks: np.matrix, betas: np.array,
+    def add_rules_from_matrix(self, A_ks: np.matrix, betas: List[Any],
                               deltas: np.matrix = None, thetas: np.array = None):
         """Adds several rules through the input matrices.
 
@@ -230,8 +230,8 @@ class RuleBaseModel():
             A_k = np.asarray(A_k)[0]
             A_values = {U_i: A_k_value for U_i, A_k_value
                         in zip(self.U, A_k) if not pd.isna(A_k_value)}
-            self.add_rule(Rule(A_values=A_values, beta=beta.tolist()[0],
-                               delta=delta, theta=theta))
+            self.add_rule(Rule(A_values=A_values, beta=beta, delta=delta,
+                               theta=theta))
 
     # TODO: add get_ function that returns the full rules matrix (all
     # combination of antecedent attributes' values) as a boilerplate for
@@ -308,6 +308,8 @@ class RuleBaseModel():
                           np.prod([1 - weight_k for weight_k
                                    in activation_weights]))
                           for left_prod in left_prods]
+        # TODO: `brb.py:307: RuntimeWarning: invalid value encountered in
+        # double_scalars` while running test.py
 
         # handles the case where there is 0 certainty, i.e., completely 0 input
         if all(np.isnan(belief_degrees)):

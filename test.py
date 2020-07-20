@@ -126,7 +126,7 @@ if __name__ == "__main__":
         ['low', 'medium'],
         ['low', 'large']
     ])
-    betas = np.matrix(['RS', 'GP', 'GP', 'RS', 'RS', 'GP']).T
+    betas = ['RS', 'GP', 'GP', 'RS', 'RS', 'GP']
     model.add_rules_from_matrix(A_ks=A_ks, betas=betas)
 
     print('Success!')
