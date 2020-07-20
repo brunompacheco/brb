@@ -236,7 +236,13 @@ class RuleBaseModel():
             A_k = np.asarray(A_k)[0]
             A_values = {U_i: A_k_value for U_i, A_k_value
                         in zip(self.U, A_k) if not pd.isna(A_k_value)}
-            self.add_rule(Rule(A_values=A_values, beta=beta, delta=delta,
+
+            # transforms referential value to rule shape
+            rule_beta = {D_i: 0.0 for D_i in self.D}
+            rule_beta[beta] = 1.0
+            rule_beta = list(rule_beta.values())
+
+            self.add_rule(Rule(A_values=A_values, beta=rule_beta, delta=delta,
                                theta=theta))
 
     # TODO: add get_ function that returns the full rules matrix (all
