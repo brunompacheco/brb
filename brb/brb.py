@@ -175,6 +175,9 @@ class RuleBaseModel():
 
         # TODO: handle NaN values
 
+        # consequent values must agree in shapep with the model's consequents
+        assert len(new_rule.beta) == len(self.D)
+
         self.rules.append(new_rule)
 
     def add_rules_from_matrix(self, A_ks: np.matrix, betas: List[Any],
@@ -224,6 +227,9 @@ class RuleBaseModel():
 
         # there must be a weight for every rule
         assert len(thetas) == A_ks.shape[0]
+
+        # beta values must agree with the model's referential values
+        assert set(betas).issubset(self.D)
 
         for A_k, beta, delta, theta in zip(A_ks, betas, deltas, thetas):
             # converst to dict and drops nan values
