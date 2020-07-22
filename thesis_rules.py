@@ -29,4 +29,45 @@ if __name__ == "__main__":
         betas=consequent.values
     )
     
-    # TODO: add tests
+    # input test
+    X = AttributeInput({
+        'Quality demands': {
+            'low': 0.5,
+            'high': 0.5
+        },
+        'Time resources': {
+            'large': 0.0,
+            'low': 1.0
+        },
+        'Users ability': {
+            'medium': 0.0,
+            'high': 1.0
+        },
+        'Type of HPs': {
+            'continuous': 1.0,
+            'discrete': 0.0
+        },
+        'Dimensionality of HPs': {
+            'low': 1.0,
+            'high': 0.0
+        },
+        'Parallel evaluations necessary': {
+            'yes': 0.0,
+            'no': 1.0
+        },
+        'Number of possible evaluations': {
+            'low': 0.0,
+            'high': 0.0
+        },
+        'Obtainability of good approximate': {
+            'yes': 0.0,
+            'no': 1.0
+        },
+        'Obtainability of gradients': {
+            'yes': 0.0,
+            'no': 1.0
+        }
+    })
+    belief_degrees = model.run(X)
+
+    print(belief_degrees)
