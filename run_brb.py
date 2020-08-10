@@ -6,11 +6,9 @@ import pandas as pd
 from brb.brb import RuleBaseModel, AttributeInput
 
 
-@click.command()
-@click.argument('rules', type=click.Path(exists=True))
-def _main(rules):
+def get_model_from_csv(csv_path: str) -> RuleBaseModel:
     # import rules
-    rules = pd.read_csv(rules, sep=';', index_col=0)
+    rules = pd.read_csv(csv_path, sep=';', index_col=0)
     rules = rules[rules.columns[1:]]  # drop weight column (empty)
 
     # split attributes
@@ -29,12 +27,19 @@ def _main(rules):
         A_ks=A_ks,
         betas=consequent.values
     )
+
+    return model
+
+@click.command()
+@click.argument('rules', type=click.Path(exists=True))
+def _main(rules):
+    model = get_model_from_csv(rules)
     print('Model created')
 
     # get rule input
     print('\nPlease enter the antecedents values in the order of the referential values displayed, separated by commas\n')
     attr_input = dict()
-    for U_i, A_i in A.items():
+    for U_i, A_i in model.A.items():
         print('Input for {} {}:'.format(U_i, A_i))
         user_input = input()
         user_inputs = user_input.replace(' ', '').split(',')
@@ -51,6 +56,8 @@ def _main(rules):
 
     X = AttributeInput(attr_input)
     belief_degrees = model.run(X)
+
+    # TODO: display rules and its activations with the results
 
     print('\nResult:')
     for D_j, beta_j in zip(model.D, belief_degrees):
