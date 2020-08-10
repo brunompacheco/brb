@@ -76,7 +76,7 @@ class Rule():
             beta: List[float],
             delta: Dict[str, float] = None,
             theta: float = 1,
-            matching_degree: Union[str, Callable] = 'geometric'
+            matching_degree: Union[str, Callable] = 'arithmetic'
         ):
         self.A_values = A_values
 
@@ -106,9 +106,25 @@ class Rule():
         if self.matching_degree == 'geometric':
             return self._geometric_matching_degree(self.delta, self.A_values, X)
         elif self.matching_degree == 'arithmetic':
-            raise NotImplementedError
+            return self._arithmetic_matching_degree(self.delta, self.A_values, X)
         elif callable(self.matching_degree):
             return self.matching_degree(self.delta, self.A_values, X)
+
+    @staticmethod
+    def _arithmetic_matching_degree(
+            delta: Dict[str, float],
+            A_values: Dict[str, Any],
+            X: AttributeInput
+        ) -> float:
+        norm_delta = {attr: d / sum(delta.values()) for attr, d
+                      in delta.items()}
+        weighted_alpha = [[
+                alpha_i * norm_delta[attr] for A_i, alpha_i
+                in X.attr_input[attr].items() if A_i == A_values[attr]
+            ] for attr in A_values.keys()
+        ]
+
+        return np.sum(weighted_alpha)
 
     @staticmethod
     def _geometric_matching_degree(
