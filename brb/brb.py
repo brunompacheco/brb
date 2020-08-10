@@ -28,7 +28,7 @@ approach.
     >>> model.run(X)
     [0.15517241379310348, 0.8448275862068964]
 """
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union, Callable
 
 import numpy as np
 import pandas as pd
@@ -63,11 +63,21 @@ class Rule():
         delta: \delta_k. Relative weights of antecedent attributes. If not
         provided, 1 will be set for all attributes.
         theta: \theta_k. Rule weight.
-        (completely) activated.
+        matching_degree: \phi. Defines how to calculate the matching degree for
+        the rule. If `Callable`, must be a function that takes `delta`,
+        `A_values` and `X` as input. If string, must be either 'geometric'
+        (default) or 'arithmetic', which apply the respective weighted means.
     """
 
-    def __init__(self, A_values: Dict[str, Any], beta: List[float],
-                 delta: Dict[str, float] = None, theta: float = 1):
+    def __init__(
+            self,
+            A_values: Dict[str,
+            Any],
+            beta: List[float],
+            delta: Dict[str, float] = None,
+            theta: float = 1,
+            matching_degree: Union[str, Callable] = 'geometric'
+        ):
         self.A_values = A_values
 
         if delta is None:
@@ -82,6 +92,8 @@ class Rule():
         self.theta = theta
         self.beta = beta
 
+        self.matching_degree = matching_degree
+
     def get_matching_degree(self, X: AttributeInput) -> float:
         """Calculates the matching degree of the rule based on input `X`.
 
@@ -91,12 +103,25 @@ class Rule():
         """
         self._assert_input(X)
 
-        norm_delta = {attr: d / max(self.delta.values()) for attr, d
-                      in self.delta.items()}
+        if self.matching_degree == 'geometric':
+            return self._geometric_matching_degree(self.delta, self.A_values, X)
+        elif self.matching_degree == 'arithmetic':
+            raise NotImplementedError
+        elif callable(self.matching_degree):
+            return self.matching_degree(self.delta, self.A_values, X)
+
+    @staticmethod
+    def _geometric_matching_degree(
+            delta: Dict[str, float],
+            A_values: Dict[str, Any],
+            X: AttributeInput
+        ) -> float:
+        norm_delta = {attr: d / max(delta.values()) for attr, d
+                      in delta.items()}
         weighted_alpha = [[
                 alpha_i ** norm_delta[attr] for A_i, alpha_i
-                in X.attr_input[attr].items() if A_i == self.A_values[attr]
-            ] for attr in self.A_values.keys()
+                in X.attr_input[attr].items() if A_i == A_values[attr]
+            ] for attr in A_values.keys()
         ]
 
         return np.prod(weighted_alpha)
