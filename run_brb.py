@@ -57,7 +57,14 @@ def _main(rules):
     X = AttributeInput(attr_input)
     belief_degrees = model.run(X)
 
-    # TODO: display rules and its activations with the results
+    # Display rules and its activations with the results
+    print('\nActivated Rules:')
+
+    matching_degrees = [rule.get_matching_degree(X) for rule in model.rules]
+
+    for rule, matching_degree in zip(model.rules, matching_degrees):
+        if matching_degree > 0:
+            print("[Matching Degree: {}] {}".format(matching_degree, rule))
 
     print('\nResult:')
     for D_j, beta_j in zip(model.D, belief_degrees):
