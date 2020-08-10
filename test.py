@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.optimize import minimize
 from brb.brb import RuleBaseModel, Rule, AttributeInput
 
 if __name__ == "__main__":
@@ -8,15 +9,68 @@ if __name__ == "__main__":
     D = ['good', 'bad']
     model = RuleBaseModel(U=U, A=A, D=D, F=None)
 
-    model.add_rule(Rule(
+    good_rule = Rule(
         A_values={'Antecedent':'good'},
         beta=[1, 0]  # completely good
-    ))
-
-    model.add_rule(Rule(
+    )
+    bad_rule = Rule(
         A_values={'Antecedent':'bad'},
         beta=[0, 1]  # completely bad
-    ))
+    )
+    model.add_rule(good_rule)
+    model.add_rule(bad_rule)
+
+    # Arithmetic matching degree calculation
+    good_rule.matching_degree = 'arithmetic'
+    X = AttributeInput({
+        'Antecedent': {
+            'good': 0,
+            'bad': 0
+        }
+    })
+    assert good_rule.get_matching_degree(X) == 0.0
+    X = AttributeInput({
+        'Antecedent': {
+            'good': 0,
+            'bad': 0
+        }
+    })
+    assert good_rule.get_matching_degree(X) == 0.0
+
+    # Matching degrees boundaries
+    def obj_function(A, rule):
+        X = AttributeInput({
+            'Antecedent': {
+                'good': A[0],
+                'bad': A[1]
+            }
+        })
+        return rule.get_matching_degree(X)
+
+    res = minimize(obj_function, [1,1], args=good_rule, bounds=[(0,1), (0,1)])
+    assert res['success'] == True
+    assert res['fun'] >= 0
+
+    res = minimize(obj_function, [1,1], args=bad_rule, bounds=[(0,1), (0,1)])
+    assert res['success'] == True
+    assert res['fun'] >= 0
+
+    def obj_function(A, rule):
+        X = AttributeInput({
+            'Antecedent': {
+                'good': A[0],
+                'bad': A[1]
+            }
+        })
+        return - rule.get_matching_degree(X)
+
+    res = minimize(obj_function, [1,1], args=good_rule, bounds=[(0,1), (0,1)])
+    assert res['success'] == True
+    assert - res['fun'] <= 1
+
+    res = minimize(obj_function, [1,1], args=bad_rule, bounds=[(0,1), (0,1)])
+    assert res['success'] == True
+    assert - res['fun'] <= 1
 
     # vanishing input
     X = AttributeInput({
