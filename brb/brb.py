@@ -131,6 +131,18 @@ class Rule():
         input_attributes = set(X.attr_input.keys())
         assert rule_attributes.intersection(input_attributes) == rule_attributes
 
+    def __str__(self):
+        A_values_str = ["({}:{})".format(U_i, A_i)
+                        for U_i, A_i
+                        in self.A_values.items()]
+
+        str_out = r' /\ '.join(A_values_str)
+
+        # TODO: add consequents labels
+        str_out += ' => ' + str(self.beta)
+
+        return str_out
+
 class RuleBaseModel():
     """Parameters for the model.
 
@@ -248,6 +260,8 @@ class RuleBaseModel():
     # TODO: add get_ function that returns the full rules matrix (all
     # combination of antecedent attributes' values) as a boilerplate for
     # defining the full set of rules.
+
+    # TODO: add interface for "tunable" parameters
 
     def run(self, X: AttributeInput):
         """Infer the output based on the RIMER approach.
