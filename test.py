@@ -5,9 +5,8 @@ from brb.brb import RuleBaseModel, Rule, AttributeInput
 if __name__ == "__main__":
     # setup for simple tests
     U = ['Antecedent']
-    A = {'Antecedent': ['good', 'bad']}
     D = ['good', 'bad']
-    model = RuleBaseModel(U=U, A=A, D=D, F=None)
+    model = RuleBaseModel(U=U, D=D, F=None)
 
     good_rule = Rule(
         A_values={'Antecedent':'good'},
@@ -165,10 +164,6 @@ if __name__ == "__main__":
     # matrix input
     model = RuleBaseModel(
         U=['A_1', 'A_2'],
-        A={
-            'A_1': ['high', 'low'],
-            'A_2': ['large', 'medium', 'small']
-        },
         D=['RS', 'GP']
     )
 

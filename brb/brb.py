@@ -192,20 +192,14 @@ class RuleBaseModel():
 
     Attributes:
         U: Antecendent attributes' names.
-        A: Referential values for each antecedent.
         D: Consequent referential values.
         F: ?
         rules: List of rules.
     """
-    def __init__(self, U: List[str], A: Dict[str, List[Any]], D: List[Any],
-                 F=None):
+    def __init__(self, U: List[str], D: List[Any], F=None):
         # no repeated elements for U
         assert len(U) == len(set(U))
         self.U = U
-
-        # referential values for all antecedent attributes must be provided
-        assert set(U) == set(A.keys())
-        self.A = A
 
         self.D = D
         self.F = F
@@ -220,11 +214,6 @@ class RuleBaseModel():
         """
         # all reference values must be related to an attribute
         assert set(new_rule.A_values.keys()).issubset(set(self.U))
-
-        # the reference values that activate the rule must be a valid
-        # referential value in the self
-        for U_i, A_i in new_rule.A_values.items():
-            assert A_i in self.A[U_i]
 
         # TODO: handle NaN values
 
@@ -256,12 +245,6 @@ class RuleBaseModel():
 
         # every rule must comply to the amount of antecedent attributes
         assert A_ks.shape[1] == len(self.U)
-
-        # the values in the matrix must comply to the referential values in the
-        # model
-        for A_i, A_ref in zip(A_ks.T, self.A.values()):
-            A_i = A_i[~pd.isna(A_i.tolist())]  # drops nan values
-            assert np.isin(A_i, A_ref).all()
 
         # same is true for the consequents
         assert np.isin(betas, self.D).all()
