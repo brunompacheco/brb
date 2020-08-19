@@ -65,7 +65,8 @@ class Rule():
         theta: \theta_k. Rule weight.
         matching_degree: \phi. Defines how to calculate the matching degree for
         the rule. If `Callable`, must be a function that takes `delta`,
-        `A_values` and `X` as input. If string, must be either 'geometric'
+        and `alphas_i` (dictionary that maps antecedents to their matching
+        degree given input) as input. If string, must be either 'geometric'
         (default) or 'arithmetic', which apply the respective weighted means.
     """
 
@@ -133,25 +134,29 @@ class Rule():
         """
         self._assert_input(X)
 
+        alphas_i = {
+            U_i: self.get_antecedent_matching(
+                self.A_values[U_i], X.attr_input[U_i]
+            )
+            for U_i in self.A_values.keys()
+        }
+
         if self.matching_degree == 'geometric':
-            return self._geometric_matching_degree(self.delta, self.A_values, X)
+            return self._geometric_matching_degree(self.delta, alphas_i)
         elif self.matching_degree == 'arithmetic':
-            return self._arithmetic_matching_degree(self.delta, self.A_values, X)
+            return self._arithmetic_matching_degree(self.delta, alphas_i)
         elif callable(self.matching_degree):
-            return self.matching_degree(self.delta, self.A_values, X)
+            return self.matching_degree(self.delta, alphas_i)
 
     @staticmethod
     def _arithmetic_matching_degree(
             delta: Dict[str, float],
-            A_values: Dict[str, Any],
-            X: AttributeInput
+            alphas_i: Dict[str, float]
         ) -> float:
         norm_delta = {attr: d / sum(delta.values()) for attr, d
                       in delta.items()}
-        weighted_alpha = [[
-                alpha_i * norm_delta[attr] for A_i, alpha_i
-                in X.attr_input[attr].items() if A_i == A_values[attr]
-            ] for attr in A_values.keys()
+        weighted_alpha = [
+            alpha_i * norm_delta[U_i] for U_i, alpha_i in alphas_i.items()
         ]
 
         return np.sum(weighted_alpha)
@@ -159,15 +164,12 @@ class Rule():
     @staticmethod
     def _geometric_matching_degree(
             delta: Dict[str, float],
-            A_values: Dict[str, Any],
-            X: AttributeInput
+            alphas_i: Dict[str, float]
         ) -> float:
         norm_delta = {attr: d / max(delta.values()) for attr, d
                       in delta.items()}
-        weighted_alpha = [[
-                alpha_i ** norm_delta[attr] for A_i, alpha_i
-                in X.attr_input[attr].items() if A_i == A_values[attr]
-            ] for attr in A_values.keys()
+        weighted_alpha = [
+            alpha_i ** norm_delta[U_i] for U_i, alpha_i in alphas_i.items()
         ]
 
         return np.prod(weighted_alpha)
