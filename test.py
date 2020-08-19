@@ -178,4 +178,10 @@ if __name__ == "__main__":
     betas = ['RS', 'GP', 'GP', 'RS', 'RS', 'GP']
     model.add_rules_from_matrix(A_ks=A_ks, betas=betas)
 
+    # antecedent matching degree
+    assert Rule.get_antecedent_matching('A', 'A') == 1.0
+    assert Rule.get_antecedent_matching('A', 'B') == 0.0
+
+    assert Rule.get_antecedent_matching('A', {'A': 0.7, 'B': 0.3}) == 0.7
+
     print('Success!')

@@ -94,6 +94,36 @@ class Rule():
 
         self.matching_degree = matching_degree
 
+    @staticmethod
+    def get_antecedent_matching(A_i, X_i) -> float:
+        """Quantifies matching of an input and a referential value.
+
+        Args:
+            A_i: Referential value for antecedent U_i. Can be a category
+            (string), continuous or discrete numerical value.
+            X_i: Input value for antecedent U_i. Must be either a single value
+            that matches the Referential value or a dictionary that maps the
+            values to certainty.
+
+        Returns:
+            match: Between 0-1, quantifies how much `X_i` matches the
+            referential value `A_i`.
+        """
+        match = 0.0
+        
+        if isinstance(X_i, type(A_i)):
+            match = float(X_i == A_i)
+        elif isinstance(X_i, dict):
+            try:
+                match = float(X_i[A_i])
+            except KeyError:
+                match = 0.0
+        else:
+            # TODO: raise warning for mismatched types
+            pass
+
+        return match
+
     def get_matching_degree(self, X: AttributeInput) -> float:
         """Calculates the matching degree of the rule based on input `X`.
 
