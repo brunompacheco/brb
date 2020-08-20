@@ -23,6 +23,7 @@ def get_model_from_csv(csv_path: str) -> RuleBaseModel:
 
     # add rules
     A_ks = np.matrix(antecedents.values)
+
     model.add_rules_from_matrix(
         A_ks=A_ks,
         betas=consequent.values

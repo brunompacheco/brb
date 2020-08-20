@@ -260,7 +260,11 @@ class RuleBaseModel():
         # the values in the matrix must comply to the referential values in the
         # model
         for A_i, A_ref in zip(A_ks.T, self.A.values()):
+            #import pdb
+            #pdb.set_trace()
             A_i = A_i[~pd.isna(A_i.tolist())]  # drops nan values
+            #import pdb
+            #pdb.set_trace()
             assert np.isin(A_i, A_ref).all()
 
         # same is true for the consequents

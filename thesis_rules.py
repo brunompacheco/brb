@@ -12,8 +12,8 @@ if __name__ == "__main__":
 
     rules = rules[rules.columns[1:]]  # drop weight column (empty)
 
-    consequent = rules.iloc[:,-1]
-    antecedents = rules.iloc[:,:-1]
+    consequent = rules.iloc[:, -1]
+    antecedents = rules.iloc[:, :-1]
 
     # model setup
     U = antecedents.columns

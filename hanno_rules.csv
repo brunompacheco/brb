@@ -1,0 +1,15 @@
+;Rule Weight ?_k;Quality demands;Time resources;Users ability;Type of HPs;Dimensionality of HPs;Parallel evaluations necessary;Number of possible evaluations;Obtainability of good approximate;Obtainability of gradients;Hyperparameter Tuning Method
+1;;low;;;;;;;;;default
+2;;high;large;;;;;;;;random search
+3;;high;low;high;;;;;;yes;gradient based
+4;;high;low;high;;;;;yes;no;approximation based
+5;;high;low;medium;continuous;;yes;high;;;population based
+6;;high;low;medium;discrete;;yes;high;;;SMAC or TPE
+7;;high;low;medium;;;yes;low;;;SMAC or TPE
+8;;high;low;medium;discrete;high;no;;;;SMAC or TPE
+9;;high;low;medium;continuous;low;no;;;;GP
+10;;high;low;high;continuous;;yes;high;no;no;population based
+11;;high;low;high;discrete;;yes;high;no;no;SMAC or TPE
+12;;high;low;high;;;yes;low;no;no;SMAC or TPE
+13;;high;low;high;discrete;high;no;;no;no;SMAC or TPE
+14;;high;low;high;continuous;low;no;;no;no;GP
