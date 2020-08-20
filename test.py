@@ -232,4 +232,36 @@ if __name__ == "__main__":
     for referential_value, refv_type in referential_values:
         assert isinstance(_prep_referential_value(referential_value), refv_type)
 
+    # interval-based rules
+    model = RuleBaseModel(
+        U=['A_1', 'A_2'],
+        D=['Y', 'N']
+    )
+
+    # numerical input, interval rule
+    rule = Rule(
+        A_values={'A_1':'[1,2]', 'A_2':'[1.0,2.0]'},
+        beta=[1, 0]
+    )
+    input_matches = [
+        (AttributeInput({'A_1': 1, 'A_2': '0.999'}), 0.5),
+        (AttributeInput({'A_1': '1', 'A_2': '1.999'}), 1.0),
+        (AttributeInput({'A_1': 0, 'A_2': '[1, 1.5]'}), 0.5),
+    ]
+    for X, expected_matching_degree in input_matches:
+        assert rule.get_matching_degree(X) == expected_matching_degree
+
+    # interval input, numerical rule
+    rule = Rule(
+        A_values={'A_1':'3', 'A_2':3},
+        beta=[0, 1]
+    )
+    input_matches = [
+        (AttributeInput({'A_1': 3, 'A_2': '3'}), 1.0),
+        (AttributeInput({'A_1': '[2,3]', 'A_2': '1.999'}), 0.5),
+        (AttributeInput({'A_1': '3', 'A_2': '[1, 3.5]'}), 1.0),
+    ]
+    for X, expected_matching_degree in input_matches:
+        assert rule.get_matching_degree(X) == expected_matching_degree
+
     print('Success!')
