@@ -28,10 +28,66 @@ approach.
     >>> model.run(X)
     [0.15517241379310348, 0.8448275862068964]
 """
+from ast import literal_eval
 from typing import List, Dict, Any, Union, Callable
+from warnings import warn
 
 import numpy as np
 import pandas as pd
+
+from interval import interval
+
+
+def _prep_referential_value(X_i):
+    # accepts pythonic inputs
+    try:
+        # TODO: rewrite code based on `literal_eval` application on the input
+        eval_X_i = literal_eval(X_i)
+
+        # interval strings could be conflicting with lists
+        if type(eval_X_i) is not list:
+            _X_i = eval_X_i
+        else:
+            _X_i = X_i
+    except ValueError:
+        _X_i = X_i
+
+    if isinstance(_X_i, str):
+        # strips whitespaces from the inputs
+        _X_i = _X_i.strip()
+
+        # converts to numeric if so
+        if is_numeric(_X_i):
+            try:
+                _X_i = int(_X_i)
+            except ValueError:
+                _X_i = float(_X_i)
+
+        if _check_is_interval(_X_i):
+            _X_i_start, _X_i_end = _prep_interval(_X_i)
+
+            try:
+                _X_i_start = int(_X_i_start)
+                _X_i_end = int(_X_i_end)
+            except ValueError:
+                _X_i_start = float(_X_i_start)
+                _X_i_end = float(_X_i_end)
+
+            if isinstance(_X_i_start, int) and isinstance(_X_i_end, int):
+                _X_i = set(range(_X_i_start, _X_i_end + 1))
+            else:
+                _X_i = interval[_X_i_start, _X_i_end]
+
+    return _X_i
+
+def _prep_interval(value: str):
+    if _check_is_interval(value):
+        _value = value.replace(' ', '').replace('[', '').replace(']', '')
+        start, end = _value.split(',')
+
+        return start, end
+    else:
+        return value
 
 def _check_is_interval(value: str):
     is_interval = True
