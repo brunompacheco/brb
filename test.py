@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.optimize import minimize
-from brb.brb import RuleBaseModel, Rule, AttributeInput, _check_is_interval
+from interval import interval
+from brb.brb import RuleBaseModel, Rule, AttributeInput, _check_is_interval, _prep_referential_value
 
 if __name__ == "__main__":
     # setup for simple tests
@@ -191,5 +192,22 @@ if __name__ == "__main__":
     true_intervals = ['[1,2]', '[1.0, 2]', '[1.2, 2.1]', ' [1,  2] ']
     for true_interval in true_intervals:
         assert _check_is_interval(true_interval)
+
+    # referential value preparation
+    referential_values = [
+        ('word', str),
+        ('12', int),
+        (12, int),
+        ('1.27', float),
+        (1.27, float),
+        ('[1,3]', set),
+        ({1, 2, 3}, set),
+        ('[1.0, 3.0]', interval),
+        (interval[1,3], interval),
+        ("{'A':0.6, 'B': 0.4}", dict),
+        ({'A':0.6, 'B': 0.4}, dict),
+    ]
+    for referential_value, refv_type in referential_values:
+        assert isinstance(_prep_referential_value(referential_value), refv_type)
 
     print('Success!')
