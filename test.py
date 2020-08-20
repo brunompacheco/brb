@@ -180,10 +180,13 @@ if __name__ == "__main__":
     model.add_rules_from_matrix(A_ks=A_ks, betas=betas)
 
     # antecedent matching degree
-    assert Rule.get_antecedent_matching('A', 'A') == 1.0
-    assert Rule.get_antecedent_matching('A', 'B') == 0.0
-
-    assert Rule.get_antecedent_matching('A', {'A': 0.7, 'B': 0.3}) == 0.7
+    antecedents_matchings = [
+        (['A', 'A'], 1.0),
+        (['A', 'B'], 0.0),
+        (['A', {'A': 0.7, 'B': 0.3}], 0.7)
+    ]
+    for antecedents, expected_match in antecedents_matchings:
+        assert Rule.get_antecedent_matching(*antecedents) == expected_match
 
     # interval string check
     not_intervals = ['', 'word', '12', '1.2', '[1]', '[,]']
