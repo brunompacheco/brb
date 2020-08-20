@@ -181,9 +181,28 @@ if __name__ == "__main__":
 
     # antecedent matching degree
     antecedents_matchings = [
+        # easy referential values
         (['A', 'A'], 1.0),
         (['A', 'B'], 0.0),
-        (['A', {'A': 0.7, 'B': 0.3}], 0.7)
+        (['12', 12], 1.0),
+        ([12, '9'], 0.0),
+        # uncertain input
+        (['A', {'A': 0.7, 'B': 0.3}], 0.7),
+        (['A', "{'A': 0.7, 'B': 0.3}"], 0.7),
+        # interval referential values
+        (['[1,2]', '[1,2]'], 1.0),
+        (['[1.0,2.0]', '[1.0,2.0]'], 1.0),
+        (['[1,2]', '[2,3]'], 0.5),
+        (['[1.0,2.0]', '[2.0,3.0]'], 0.0),
+        (['[1,2]', '[3,4]'], 0.0),
+        (['[1.0,2.0]', '[1.5,2.5]'], 0.5),
+        (['[1.5,2.0]', '[1.5,2.5]'], 0.5),
+        (['[1.0,2.0]', '[1.5,2.0]'], 1.0),
+        # mixed
+        (['[1,2]', '2'], 1.0),
+        (['[1,2]', 3], 0.0),
+        (['[1.0,2.0]', '2'], 1.0),
+        (['[1.0,2.0]', 3], 0.0),
     ]
     for antecedents, expected_match in antecedents_matchings:
         assert Rule.get_antecedent_matching(*antecedents) == expected_match
