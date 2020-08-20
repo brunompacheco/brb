@@ -1,4 +1,4 @@
-;Rule Weight ?_k;Dimensionality of HPs;Conditional HP Space;#continuous HPs of ML alg.;Number of possible function evaluations/maximum number of trials;Machine Learning Algorithm;Dataset to perform ML task;Usage of One-Hot Encoding for cat. features of dataset;k-fold Cross Validation;Task that was performed by the ML algorithm who's HPs were optimized
+;Rule Weight ?_k;Dimensionality of HPs;Conditional HP Space;#continuous HPs of ML alg.;Number of possible function evaluations/maximum number of trials;Machine Learning Algorithm;Dataset to perform ML task;Usage of One-Hot Encoding for cat. features of dataset;k-fold Cross Validation;Task that was performed by the ML algorithm who's HPs were optimized;Hyperparameter Tuning Method
 1;;3;no;>=1;<2;Latent Dirichlet Allocation;;yes;;Text;Spearmint GP
 2;;3;no;>=1;2-10;Latent Dirichlet Allocation;;yes;;Text;SMAC-Spearmint GP
 3;;3;no;>=1;>10;Latent Dirichlet Allocation;;yes;;Text;all
