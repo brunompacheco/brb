@@ -33,6 +33,39 @@ from typing import List, Dict, Any, Union, Callable
 import numpy as np
 import pandas as pd
 
+def _check_is_interval(value: str):
+    is_interval = True
+
+    _value = value.replace(' ', '')
+
+    # intervals must start and end with brackets
+    try:
+        is_interval &= _value[0] == '['
+        is_interval &= _value[-1] == ']'
+    except IndexError:
+        is_interval = False
+
+    # intervals must have one (and only one) comma separating the boundaries
+    n_commas = len(_value) - len(_value.replace(',', ''))
+    is_interval &= n_commas == 1
+
+    if ',' in _value:
+        # an interval's boundaries must be numeric
+        start, end = _value[1:-1].split(',')
+
+        is_interval &= is_numeric(start)
+        is_interval &= is_numeric(end)
+    else:
+        is_interval = False
+
+    return is_interval
+
+def is_numeric(a):
+    try:
+        float(a)
+        return True
+    except:
+        return False
 
 class AttributeInput():
     """An input to the BRB system.

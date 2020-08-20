@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.optimize import minimize
-from brb.brb import RuleBaseModel, Rule, AttributeInput
+from brb.brb import RuleBaseModel, Rule, AttributeInput, _check_is_interval
 
 if __name__ == "__main__":
     # setup for simple tests
@@ -183,5 +183,13 @@ if __name__ == "__main__":
     assert Rule.get_antecedent_matching('A', 'B') == 0.0
 
     assert Rule.get_antecedent_matching('A', {'A': 0.7, 'B': 0.3}) == 0.7
+
+    # interval string check
+    not_intervals = ['', 'word', '12', '1.2', '[1]', '[,]']
+    for not_interval in not_intervals:
+        assert not _check_is_interval(not_interval)
+    true_intervals = ['[1,2]', '[1.0, 2]', '[1.2, 2.1]', ' [1,  2] ']
+    for true_interval in true_intervals:
+        assert _check_is_interval(true_interval)
 
     print('Success!')
