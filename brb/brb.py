@@ -71,8 +71,7 @@ class Rule():
 
     def __init__(
             self,
-            A_values: Dict[str,
-            Any],
+            A_values: Dict[str, Any],
             beta: List[float],
             delta: Dict[str, float] = None,
             theta: float = 1,
@@ -120,8 +119,7 @@ class Rule():
                       in delta.items()}
         weighted_alpha = [[
                 alpha_i * norm_delta[attr] for A_i, alpha_i
-                in X.attr_input[attr].items() if A_i == A_values[attr]
-            ] for attr in A_values.keys()
+                in X.attr_input[attr].items() if A_i == A_values[attr]] for attr in A_values.keys()
         ]
 
         return np.sum(weighted_alpha)
