@@ -1,5 +1,6 @@
 import os
 import random
+import string
 import numpy as np
 import pandas as pd
 
@@ -36,14 +37,43 @@ if __name__ == "__main__":
     rules_filepath = os.path.join(os.curdir, 'eggensperger2015_rules.csv')
     model = get_model_from_csv(rules_filepath)
 
-    # create test inputs
+    # create random test inputs using referential values identical with those in the rule base
 
+    num_tests = 100
+    counter = 0
+    while counter < num_tests:
+        counter += 1
+
+        attr_input = dict()
+        for U_i, A_i in model.A.items():
+            rand_ref_val = random.choice(A_i)
+            user_inputs = A_i.copy()
+            for idx, ref_val in enumerate(A_i):
+                if ref_val == rand_ref_val:
+                    user_inputs[idx] = 1
+                else:
+                    user_inputs[idx] = 0
+            attr_input[U_i] = dict(zip(A_i, user_inputs))
+
+        X = AttributeInput(attr_input)
+        belief_degrees = model.run(X)
+        print(tuple(zip(model.D, belief_degrees)))
+
+
+    # create random test inputs using new referential values
+    '''
+    # single values
     attr_input = dict()
     for U_i, A_i in model.A.items():
-        print('Input for {} {}:'.format(U_i, A_i))
-
-        rand_ref_val = random.choice(A_i)
-
+        if any('<' in ref_val for ref_val in A_i) == True:
+            rand_ref_val = random.choice(A_i)
+            if '<' in rand_ref_val:
+                rand_ref_val = ''.join(filter(str.isdigit, rand_ref_val))
+                rand_ref_val = random.randint(0, int(rand_ref_val))
+                
+                and now I have the problem, that I cannot use the user_inputs array since the input doesn't
+                match an entry in A_i for 100% and so I could enter a 1
+                
         user_inputs = A_i.copy()
         for idx, ref_val in enumerate(A_i):
             if ref_val == rand_ref_val:
@@ -53,12 +83,9 @@ if __name__ == "__main__":
         attr_input[U_i] = dict(zip(A_i, user_inputs))
 
     X = AttributeInput(attr_input)
-
-
-
     belief_degrees = model.run(X)
-
     print(belief_degrees)
+    '''
 
 
     print('success')
