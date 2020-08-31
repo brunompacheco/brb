@@ -31,7 +31,7 @@ def get_model_from_csv(csv_path: str) -> RuleBaseModel:
 
     return model
 
-def custom_input(A_i, X_i):
+def enter_custom_input(A_i, X_i):
     user_inputs = A_i.copy()
     for idx, ref_val in enumerate(A_i):
         if ref_val == X_i:
@@ -39,6 +39,29 @@ def custom_input(A_i, X_i):
         else:
             user_inputs[idx] = 0
     return user_inputs
+
+def custom_input(input):
+    attr_input = dict()
+    num = len(input[next(iter(input))])
+    for i in range(num):
+        for U_i, A_i in model.A.items():
+            user_inputs = enter_custom_input(A_i, input[U_i][i])
+            attr_input[U_i] = dict(zip(A_i, user_inputs))
+        X = AttributeInput(attr_input)
+        belief_degrees = model.run(X)
+        print(attr_input)
+        print(tuple(zip(model.D, belief_degrees)))
+
+# inputs for klein2019 custom input
+inputs = {"Dimensionality of HPs": [8, 8, 8, 8],
+          "Conditional HP Space": ['no', 'no', 'no', 'no'],
+          "#continuous HPs of ML alg.": ['>=1', '0', '>=1', '0'],
+          "Number of possible function evaluations/maximum number of trials": ['<100', '<100', '<100', '<100'],
+          "Machine Learning Algorithm": ['SVM', 'XGBoost', 'XGBoost', 'XGBoost'],
+          "Dataset to perform ML task": ['10 UCI Regression datasets', '16 OpenML classification datasets', '16 OpenML classification datasets', '16 OpenML classification datasets'],
+          "Artificial noise in dataset": ['no', 'no', 'no', 'yes'],
+          "Surrogate Benchmarking": ['yes', 'yes', 'yes', 'yes'],
+          "Task that was performed by the ML algorithm who's HPs were optimized": ['Regression', 'Classification', 'Classification', 'Classification']}
 
 curdir_path = '/Users/philippnoodt/VirtualBox_VMs/Win10/Win10_SharedFolder/MA/coding/Bruno/git/brb/'
 
@@ -71,64 +94,8 @@ if __name__ == "__main__":
 
 
     # create random test inputs using new referential values
-
-
-    # create individual test inputs
     print('\nindividual test inputs')
-    # individual test input klein2019_rules.csv
-    attr_input = dict()
-    user_inputs = []
-    for U_i, A_i in model.A.items():
-        if U_i == "Dimensionality of HPs":
-            user_inputs = custom_input(A_i, 2)
-        if U_i == "Conditional HP Space":
-            user_inputs = custom_input(A_i, 'no')
-        if U_i == "#continuous HPs of ML alg.":
-            user_inputs = custom_input(A_i, '0')
-        if U_i == "Number of possible function evaluations/maximum number of trials":
-            user_inputs = custom_input(A_i, '<50')
-        if U_i == "Machine Learning Algorithm":
-            user_inputs = custom_input(A_i, 'SVM')
-        if U_i == "Dataset to perform ML task":
-            user_inputs = custom_input(A_i, '16 OpenML classification datasets')
-        if U_i == "Artificial noise in dataset":
-            user_inputs = custom_input(A_i, 'no')
-        if U_i == "Surrogate Benchmarking":
-            user_inputs = custom_input(A_i, 'SVM')
-        if U_i == "Task that was performed by the ML algorithm who's HPs were optimized":
-            user_inputs = custom_input(A_i, 'Classification')
-
-        attr_input[U_i] = dict(zip(A_i, user_inputs))
-
-    X = AttributeInput(attr_input)
-    belief_degrees = model.run(X)
-    print(attr_input)
-    print(tuple(zip(model.D, belief_degrees)))
-    '''
-    # single values
-    attr_input = dict()
-    for U_i, A_i in model.A.items():
-        if any('<' in ref_val for ref_val in A_i) == True:
-            rand_ref_val = random.choice(A_i)
-            if '<' in rand_ref_val:
-                rand_ref_val = ''.join(filter(str.isdigit, rand_ref_val))
-                rand_ref_val = random.randint(0, int(rand_ref_val))
-                
-                and now I have the problem, that I cannot use the user_inputs array since the input doesn't
-                match an entry in A_i for 100% and so I could enter a 1
-                
-        user_inputs = A_i.copy()
-        for idx, ref_val in enumerate(A_i):
-            if ref_val == rand_ref_val:
-                user_inputs[idx] = 1
-            else:
-                user_inputs[idx] = 0
-        attr_input[U_i] = dict(zip(A_i, user_inputs))
-
-    X = AttributeInput(attr_input)
-    belief_degrees = model.run(X)
-    print(belief_degrees)
-    '''
+    custom_input(inputs)
 
 
     print('success')
