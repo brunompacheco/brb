@@ -178,6 +178,11 @@ class Rule():
                 _X_i_length = len(_X_i)
 
                 match = float(intrsc_length / _X_i_length)
+            elif isinstance(_A_i, interval):
+                warn((
+                    'comparison between integer interval input `{}` and '
+                    'continuous interval `{}` not supported.'
+                ).format(X_i, A_i))
         elif isinstance(_X_i, dict):
             if isinstance(_A_i, str) or is_numeric(_A_i):
                 match = float(_X_i[_A_i])
