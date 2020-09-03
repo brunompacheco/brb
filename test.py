@@ -1,5 +1,7 @@
 import os
 import numpy as np
+import pandas as pd
+
 from scipy.optimize import minimize
 from interval import interval
 from brb.brb import RuleBaseModel, Rule, AttributeInput, _check_is_interval, _prep_referential_value
@@ -276,7 +278,22 @@ if __name__ == "__main__":
     for X, expected_matching_degree in input_matches:
         assert rule.get_matching_degree(X) == expected_matching_degree
 
-    # matrix rule input
-    matrix_filepath = os.path.join(os.curdir, 'test_rules.csv')
+    # dataframe rule input
+    rules_filepath = os.path.join(os.curdir, 'test_rules.csv')
+    df_rules = pd.read_csv(rules_filepath, index_col='rule_id')
+
+    df_cols = df_rules.columns
+
+    U = [col for col in df_cols if col[:2] == 'A_']
+    D = [col for col in df_cols if col[:2] == 'D_']
+
+    model = RuleBaseModel(
+        U=U,
+        D=D
+    )
+
+    model.add_rules_from_df(rules_df=df_rules)
+
+    assert len(model.rules) == df_rules.shape[0]
 
     print('Success!')

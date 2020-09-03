@@ -383,7 +383,7 @@ class RuleBaseModel():
 
         # TODO: handle NaN values
 
-        # consequent values must agree in shapep with the model's consequents
+        # consequent values must agree in shape with the model's consequents
         assert len(new_rule.beta) == len(self.D)
 
         self.rules.append(new_rule)
@@ -391,7 +391,8 @@ class RuleBaseModel():
     def add_rules_from_df(
             self,
             rules_df: pd.DataFrame,
-            thetas: str = None
+            thetas: str = None,
+            deltas_df: pd.DataFrame = None,
         ):
         """Adds rules from pandas.DataFrame object. Columns must agree to model.
 
@@ -400,9 +401,29 @@ class RuleBaseModel():
             be the antecedents, consequents and rule weights (optional).
             thetas: Rules weights column. If `None` (default value), same weight
             (1.0) is given to all rules.
+            deltas_df: Dataframe containing the attribute weights for each
+            rules.
         """
+        # TODO: add deltas input support
         antecedents_df = rules_df[self.U]
         consequents_df = rules_df[self.D]
+
+        A_ks = np.matrix(antecedents_df.values)
+        betas = np.matrix(consequents_df.values)
+
+        if thetas is not None:
+            thetas = rules_df[thetas].values
+
+        deltas = None
+        if deltas_df is not None:
+            deltas = deltas_df.values
+
+        self.add_rules_from_matrix(
+            A_ks=A_ks,
+            betas=betas,
+            thetas=thetas,
+            deltas=deltas
+        )
 
     def add_rules_from_matrix(
             self,
