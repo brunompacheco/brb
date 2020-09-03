@@ -141,8 +141,6 @@ class AttributeInput():
     def __init__(self, attr_input: Dict[str, Dict[Any, float]]):
         self.attr_input = attr_input
 
-    # TODO: add transformation methods
-
 class Rule():
     """A rule definition in a BRB system.
 
