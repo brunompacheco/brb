@@ -4,7 +4,10 @@ import pandas as pd
 
 from scipy.optimize import minimize
 from interval import interval
-from brb.brb import RuleBaseModel, Rule, AttributeInput, _check_is_interval, _prep_referential_value
+
+from brb.attr_input import AttributeInput
+from brb.brb import RuleBaseModel
+from brb.rule import Rule, _check_is_interval, _prep_referential_value
 
 if __name__ == "__main__":
     # setup for simple tests
