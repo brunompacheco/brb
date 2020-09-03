@@ -307,4 +307,18 @@ if __name__ == "__main__":
 
     assert len(model.rules) == df_rules.shape[0]
 
+    input_matches = [
+        (AttributeInput(dict(zip(U, ['Yes', '1:2', 1.5]))), 1.0),
+        (AttributeInput(dict(zip(U, [{'Yes':0.5, 'No':0.5}, '0:1', '0.5:1.5']))), 0.5),
+    ]
+    for X, expected_matching_degree in input_matches:
+        assert model.rules[-2].get_matching_degree(X) == expected_matching_degree
+
+    input_matches = [
+        (AttributeInput(dict(zip(U, ['No', '1.0:2.0', 3.5]))), 1.0),
+        (AttributeInput(dict(zip(U, [{'Yes':0.5, 'No':0.5}, '0:2.0', '2.2:4.2']))), 0.5),
+    ]
+    for X, expected_matching_degree in input_matches:
+        assert model.rules[-1].get_matching_degree(X) == expected_matching_degree
+
     print('Success!')
