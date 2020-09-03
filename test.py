@@ -7,7 +7,7 @@ from interval import interval
 
 from brb.attr_input import AttributeInput
 from brb.brb import RuleBaseModel
-from brb.rule import Rule, _check_is_interval, _prep_referential_value
+from brb.rule import Rule, str2interval, _prep_referential_value
 
 if __name__ == "__main__":
     # setup for simple tests
@@ -196,6 +196,21 @@ if __name__ == "__main__":
     for A_k, rule in zip(A_ks, model.rules):
         assert (A_k == list(rule.A_values.values())).all()
 
+    # interval string check
+    not_intervals = ['', 'word', '12', '1.2', '<3]', '2:']
+    for not_interval in not_intervals:
+        try:
+            _ = str2interval(not_interval)
+            raise AssertionError(
+                not_interval + ' should not be converted to interval'
+            )
+        except:
+            pass
+
+    true_intervals = ['1:2', '1.0: 2', '1.2: 2.1', ' 1:  2 ']
+    for true_interval in true_intervals:
+        _ = str2interval(true_interval)
+
     # antecedent matching degree
     antecedents_matchings = [
         # easy referential values
@@ -207,30 +222,22 @@ if __name__ == "__main__":
         (['A', {'A': 0.7, 'B': 0.3}], 0.7),
         (['A', "{'A': 0.7, 'B': 0.3}"], 0.7),
         # interval referential values
-        (['[1,2]', '[1,2]'], 1.0),
-        (['[1.0,2.0]', '[1.0,2.0]'], 1.0),
-        (['[1,2]', '[2,3]'], 0.5),
-        (['[1.0,2.0]', '[2.0,3.0]'], 0.0),
-        (['[1,2]', '[3,4]'], 0.0),
-        (['[1.0,2.0]', '[1.5,2.5]'], 0.5),
-        (['[1.5,2.0]', '[1.5,2.5]'], 0.5),
-        (['[1.0,2.0]', '[1.5,2.0]'], 1.0),
+        (['1:2', '1:2'], 1.0),
+        (['1.0:2.0', '1.0:2.0'], 1.0),
+        (['1:2', '2:3'], 0.5),
+        (['1.0:2.0', '2.0:3.0'], 0.0),
+        (['1:2', '3:4'], 0.0),
+        (['1.0:2.0', '1.5:2.5'], 0.5),
+        (['1.5:2.0', '1.5:2.5'], 0.5),
+        (['1.0:2.0', '1.5:2.0'], 1.0),
         # mixed
-        (['[1,2]', '2'], 1.0),
-        (['[1,2]', 3], 0.0),
-        (['[1.0,2.0]', '2'], 1.0),
-        (['[1.0,2.0]', 3], 0.0),
+        (['1:2', '2'], 1.0),
+        (['1:2', 3], 0.0),
+        (['1.0:2.0', '2'], 1.0),
+        (['1.0:2.0', 3], 0.0),
     ]
     for antecedents, expected_match in antecedents_matchings:
         assert Rule.get_antecedent_matching(*antecedents) == expected_match
-
-    # interval string check
-    not_intervals = ['', 'word', '12', '1.2', '[1]', '[,]']
-    for not_interval in not_intervals:
-        assert not _check_is_interval(not_interval)
-    true_intervals = ['[1,2]', '[1.0, 2]', '[1.2, 2.1]', ' [1,  2] ']
-    for true_interval in true_intervals:
-        assert _check_is_interval(true_interval)
 
     # referential value preparation
     referential_values = [
@@ -239,9 +246,10 @@ if __name__ == "__main__":
         (12, int),
         ('1.27', float),
         (1.27, float),
-        ('[1,3]', set),
+        ('1:3', set),
         ({1, 2, 3}, set),
-        ('[1.0, 3.0]', interval),
+        ('1.0: 3.0', interval),
+        (' 1.0  : 3.0 ', interval),
         (interval[1,3], interval),
         ("{'A':0.6, 'B': 0.4}", dict),
         ({'A':0.6, 'B': 0.4}, dict),
@@ -257,13 +265,13 @@ if __name__ == "__main__":
 
     # numerical input, interval rule
     rule = Rule(
-        A_values={'A_1':'[1,2]', 'A_2':'[1.0,2.0]'},
+        A_values={'A_1':'1:2', 'A_2':'1.0:2.0'},
         beta=[1, 0]
     )
     input_matches = [
         (AttributeInput({'A_1': 1, 'A_2': '0.999'}), 0.5),
         (AttributeInput({'A_1': '1', 'A_2': '1.999'}), 1.0),
-        (AttributeInput({'A_1': 0, 'A_2': '[1, 1.5]'}), 0.5),
+        (AttributeInput({'A_1': 0, 'A_2': '1: 1.5'}), 0.5),
     ]
     for X, expected_matching_degree in input_matches:
         assert rule.get_matching_degree(X) == expected_matching_degree
@@ -275,8 +283,8 @@ if __name__ == "__main__":
     )
     input_matches = [
         (AttributeInput({'A_1': 3, 'A_2': '3'}), 1.0),
-        (AttributeInput({'A_1': '[2,3]', 'A_2': '1.999'}), 0.25),
-        (AttributeInput({'A_1': '3', 'A_2': '[1, 3.5]'}), 1.0),
+        (AttributeInput({'A_1': '2:3', 'A_2': '1.999'}), 0.25),
+        (AttributeInput({'A_1': '3', 'A_2': '1: 3.5'}), 1.0),
     ]
     for X, expected_matching_degree in input_matches:
         assert rule.get_matching_degree(X) == expected_matching_degree

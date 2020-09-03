@@ -4,7 +4,7 @@ from warnings import warn
 
 import numpy as np
 
-from interval import interval
+from interval import interval, inf
 
 from .attr_input import AttributeInput
 
@@ -14,14 +14,8 @@ def _prep_referential_value(X_i):
     """
     try:
         # TODO: rewrite code based on `literal_eval` application on the input
-        eval_X_i = literal_eval(X_i)
-
-        # interval strings could be conflicting with lists
-        if type(eval_X_i) is not list:
-            _X_i = eval_X_i
-        else:
-            _X_i = X_i
-    except ValueError:
+        _X_i = literal_eval(X_i)
+    except (ValueError, SyntaxError):
         _X_i = X_i
 
     if isinstance(_X_i, str):
@@ -34,63 +28,48 @@ def _prep_referential_value(X_i):
                 _X_i = int(_X_i)
             except ValueError:
                 _X_i = float(_X_i)
-
-        if _check_is_interval(_X_i):
-            _X_i_start, _X_i_end = _prep_interval(_X_i)
-
+        else:
+            # if not numeric, try interval
             try:
-                _X_i_start = int(_X_i_start)
-                _X_i_end = int(_X_i_end)
-            except ValueError:
-                _X_i_start = float(_X_i_start)
-                _X_i_end = float(_X_i_end)
-
-            if isinstance(_X_i_start, int) and isinstance(_X_i_end, int):
-                _X_i = set(range(_X_i_start, _X_i_end + 1))
-            else:
-                _X_i = interval[_X_i_start, _X_i_end]
+                _X_i = str2interval(_X_i)
+            except:
+                # if not interval, then understand it as string/categorical
+                return X_i
 
     return _X_i
 
-def _prep_interval(value: str):
-    """Prepares interval input string to be converted to interval.interval.
-    """
-    if _check_is_interval(value):
-        _value = value.replace(' ', '').replace('[', '').replace(']', '')
-        start, end = _value.split(',')
+def str2interval(value: str):
+    _value = value.strip()
 
-        return start, end
+    INTERVAL_SEP = ':'
+    BT_SEP = '>'
+    ST_SEP = '<'
+    if INTERVAL_SEP in _value:
+        start, end = _value.split(INTERVAL_SEP)
+    elif BT_SEP in _value:
+        start = _value.split(BT_SEP)[-1]
+        end = inf
+    elif ST_SEP in _value:
+        start = -inf
+        end = _value.split(ST_SEP)[-1]
     else:
-        return value
+        raise ValueError('`{}` is not a proper interval'.format(value))
 
-def _check_is_interval(value: str):
-    """Checks if `value` is properly to be converted to interval.interval.
-    """
-    is_interval = True
-
-    _value = value.replace(' ', '')
-
-    # intervals must start and end with brackets
     try:
-        is_interval &= _value[0] == '['
-        is_interval &= _value[-1] == ']'
-    except IndexError:
-        is_interval = False
+        if start is not -inf:
+            start = int(start)
+        if end is not inf:
+            end = int(end)
+    except ValueError:
+        start = float(start)
+        end = float(end)
 
-    # intervals must have one (and only one) comma separating the boundaries
-    n_commas = len(_value) - len(_value.replace(',', ''))
-    is_interval &= n_commas == 1
-
-    if ',' in _value:
-        # an interval's boundaries must be numeric
-        start, end = _value[1:-1].split(',')
-
-        is_interval &= is_numeric(start)
-        is_interval &= is_numeric(end)
+    if isinstance(start, int) and isinstance(end, int):
+        value_interval = set(range(start, end + 1))
     else:
-        is_interval = False
+        value_interval = interval[start, end]
 
-    return is_interval
+    return value_interval
 
 def is_numeric(a):  # pylint: disable=missing-function-docstring
     try:
