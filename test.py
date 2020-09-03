@@ -177,8 +177,19 @@ if __name__ == "__main__":
         ['low', 'medium'],
         ['low', 'large']
     ])
-    betas = ['RS', 'GP', 'GP', 'RS', 'RS', 'GP']
+    betas = np.matrix([
+        [1.0, 0.0],
+        [0.0, 1.0],
+        [0.0, 1.0],
+        [1.0, 0.0],
+        [1.0, 0.0],
+        [0.0, 1.0]
+    ])
     model.add_rules_from_matrix(A_ks=A_ks, betas=betas)
+
+    assert len(model.rules) == len(A_ks)
+    for A_k, rule in zip(A_ks, model.rules):
+        assert (A_k == list(rule.A_values.values())).all()
 
     # antecedent matching degree
     antecedents_matchings = [

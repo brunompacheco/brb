@@ -407,7 +407,7 @@ class RuleBaseModel():
     def add_rules_from_matrix(
             self,
             A_ks: np.matrix,
-            betas: List[Any],
+            betas: np.matrix,
             deltas: np.matrix = None,
             thetas: np.array = None
         ):
@@ -417,7 +417,8 @@ class RuleBaseModel():
             A_ks: Rules antecedents referential values matrix. Each row is a
             rule and the columns are the antecedents, so the matrix values must
             be the referential values according to the model.
-            betas: Consequent referential values.
+            betas: Consequents belief degrees. Must follow the same order as the
+            model definition.
             deltas: Attribute weights of the rules. Must have the same shape as
             A_ks. If `None` (default value), equal weight (1) is given for all
             attributes over all rules.
@@ -428,13 +429,13 @@ class RuleBaseModel():
         # definition for both antecedents and consequents
 
         # the number of rules must be consistent
-        assert A_ks.shape[0] == len(betas)
+        assert A_ks.shape[0] == betas.shape[0]
 
         # every rule must comply to the amount of antecedent attributes
         assert A_ks.shape[1] == len(self.U)
 
-        # same is true for the consequents
-        assert np.isin(betas, self.D).all()
+        # there must be as many consequents as in the model definition
+        assert betas.shape[1] == len(self.D)
 
         if deltas is None:
             # all antecedents have the same weight
@@ -451,19 +452,18 @@ class RuleBaseModel():
         # there must be a weight for every rule
         assert len(thetas) == A_ks.shape[0]
 
-        # beta values must agree with the model's referential values
-        assert set(betas).issubset(self.D)
+        # convert nan values to 0
+        betas = np.nan_to_num(betas)
 
-        for A_k, beta, delta, theta in zip(A_ks, betas, deltas, thetas):
+        for A_k, beta_k, delta, theta in zip(A_ks, betas, deltas, thetas):
             # converst to dict and drops nan values
             A_k = np.asarray(A_k)[0]
+
             A_values = {U_i: A_k_value for U_i, A_k_value
                         in zip(self.U, A_k) if not pd.isna(A_k_value)}
 
             # transforms referential value to rule shape
-            rule_beta = {D_i: 0.0 for D_i in self.D}
-            rule_beta[beta] = 1.0
-            rule_beta = list(rule_beta.values())
+            rule_beta = np.asarray(beta_k)[0]
 
             self.add_rule(Rule(A_values=A_values, beta=rule_beta, delta=delta,
                                theta=theta))
