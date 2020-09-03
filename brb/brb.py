@@ -39,7 +39,8 @@ from interval import interval
 
 
 def _prep_referential_value(X_i):
-    # accepts pythonic inputs
+    """Converts pythonic string input to acceptable data type.
+    """
     try:
         # TODO: rewrite code based on `literal_eval` application on the input
         eval_X_i = literal_eval(X_i)
@@ -81,6 +82,8 @@ def _prep_referential_value(X_i):
     return _X_i
 
 def _prep_interval(value: str):
+    """Prepares interval input string to be converted to interval.interval.
+    """
     if _check_is_interval(value):
         _value = value.replace(' ', '').replace('[', '').replace(']', '')
         start, end = _value.split(',')
@@ -90,6 +93,8 @@ def _prep_interval(value: str):
         return value
 
 def _check_is_interval(value: str):
+    """Checks if `value` is properly to be converted to interval.interval.
+    """
     is_interval = True
 
     _value = value.replace(' ', '')
