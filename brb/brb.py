@@ -264,3 +264,47 @@ class RuleBaseModel():
         # TODO: add utility calculation
 
         return belief_degrees
+
+def csv2BRB(
+    csv_filepath: str,
+    antecedent_cols: List[str],
+    consequent_cols: List[str],
+    thetas: str = None,
+    deltas: List[str] = None
+    ) -> RuleBaseModel:
+    """Converts csv table to a belief rule base (RuleBaseModel).
+
+    The csv table must contain one column for each antecedent and one column for
+    each consequent in pandas-friendly format. The table also must contain a
+    header. The columns.names referred by `antecedent_cols` and
+    `consequent_cols` will be used as the reference for the antecedents and
+    consequents. Additionally, the weights of the rules and the attribute's
+    weights of each rule can be provided in the same table.
+
+    Args:
+        csv_fillepath: csv filepath to the table containing the rules.
+        antecedent_cols: List of the column's names (as in the header of the
+        table) to be used as the antecedents.
+        consequent_cols: List of the column's names (as in the header of the
+        table) to be used as the consequents.
+        thetas: Column name of the rules weights. If `None` (default), will
+        assign equal weight (1.0) to all rules.
+        deltas: Columns names of the attributes weights of each rule. Must be in
+        the same shape as the antecedents section of the table. If `None`
+        (default), will assign equal weight (1.0) to all attributes.
+    
+    Returns:
+        model: Belief Rule Base containing all the rules defined in the csv
+        file.
+    """
+    model = RuleBaseModel(U=antecedent_cols, D=consequent_cols)
+
+    df_rules = pd.read_csv(csv_filepath)
+
+    deltas_df = deltas
+    if deltas is not None:
+        deltas_df = df_rules[deltas]
+
+    model.add_rules_from_df(df_rules, thetas=thetas, deltas_df=deltas_df)
+
+    return model

@@ -6,7 +6,7 @@ from scipy.optimize import minimize
 from interval import interval
 
 from brb.attr_input import AttributeInput
-from brb.brb import RuleBaseModel
+from brb.brb import RuleBaseModel, csv2BRB
 from brb.rule import Rule, str2interval, _prep_referential_value
 
 if __name__ == "__main__":
@@ -320,5 +320,12 @@ if __name__ == "__main__":
     ]
     for X, expected_matching_degree in input_matches:
         assert model.rules[-1].get_matching_degree(X) == expected_matching_degree
+
+    # csv rule input
+    rules_filepath = os.path.join(os.curdir, 'test_rules.csv')
+
+    csv_model = csv2BRB(rules_filepath, antecedent_cols=U, consequent_cols=D)
+
+    assert len(csv_model.rules) == len(model.rules)
 
     print('Success!')
