@@ -388,6 +388,22 @@ class RuleBaseModel():
 
         self.rules.append(new_rule)
 
+    def add_rules_from_df(
+            self,
+            rules_df: pd.DataFrame,
+            thetas: str = None
+        ):
+        """Adds rules from pandas.DataFrame object. Columns must agree to model.
+
+        Args:
+            rules_df: Rules dataframe. Each row must be a rule. The columns must
+            be the antecedents, consequents and rule weights (optional).
+            thetas: Rules weights column. If `None` (default value), same weight
+            (1.0) is given to all rules.
+        """
+        antecedents_df = rules_df[self.U]
+        consequents_df = rules_df[self.D]
+
     def add_rules_from_matrix(
             self,
             A_ks: np.matrix,

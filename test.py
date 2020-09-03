@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from scipy.optimize import minimize
 from interval import interval
@@ -263,5 +264,8 @@ if __name__ == "__main__":
     ]
     for X, expected_matching_degree in input_matches:
         assert rule.get_matching_degree(X) == expected_matching_degree
+
+    # matrix rule input
+    matrix_filepath = os.path.join(os.curdir, 'test_rules.csv')
 
     print('Success!')
