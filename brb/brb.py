@@ -121,7 +121,7 @@ def _check_is_interval(value: str):
 
     return is_interval
 
-def is_numeric(a):
+def is_numeric(a):  # pylint: disable=missing-function-docstring
     try:
         float(a)
         return True
@@ -252,7 +252,9 @@ class Rule():
             elif isinstance(_A_i, dict):
                 raise NotImplementedError('Uncertain rules are not supported')
         else:
-            warn('Input {} mismatches the referential value {}'.format(X_i, A_i))
+            warn('Input {} mismatches the referential value {}'.format(
+                X_i, A_i
+            ))
 
         return match
 
@@ -386,8 +388,13 @@ class RuleBaseModel():
 
         self.rules.append(new_rule)
 
-    def add_rules_from_matrix(self, A_ks: np.matrix, betas: List[Any],
-                              deltas: np.matrix = None, thetas: np.array = None):
+    def add_rules_from_matrix(
+            self,
+            A_ks: np.matrix,
+            betas: List[Any],
+            deltas: np.matrix = None,
+            thetas: np.array = None
+        ):
         """Adds several rules through the input matrices.
 
         Args:
