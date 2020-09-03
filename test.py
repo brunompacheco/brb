@@ -258,7 +258,7 @@ if __name__ == "__main__":
     )
     input_matches = [
         (AttributeInput({'A_1': 3, 'A_2': '3'}), 1.0),
-        (AttributeInput({'A_1': '[2,3]', 'A_2': '1.999'}), 0.5),
+        (AttributeInput({'A_1': '[2,3]', 'A_2': '1.999'}), 0.25),
         (AttributeInput({'A_1': '3', 'A_2': '[1, 3.5]'}), 1.0),
     ]
     for X, expected_matching_degree in input_matches:
