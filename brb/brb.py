@@ -231,7 +231,8 @@ class Rule():
         elif isinstance(_X_i, set):
             if is_numeric(_A_i):
                 # Same as the case for interval input and numeric reference.
-                match = float(_A_i in _X_i)
+
+                match = float(_A_i in _X_i) / len(_X_i)
             elif isinstance(_A_i, set):
                 intrsc_length = len(_X_i & _A_i)
                 _X_i_length = len(_X_i)
@@ -359,6 +360,7 @@ class RuleBaseModel():
         # no repeated elements for U
         assert len(U) == len(set(U))
         self.U = U
+        # TODO: add antecedents types
 
         self.D = D
         self.F = F
