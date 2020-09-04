@@ -71,11 +71,11 @@ if __name__ == "__main__":
         return - rule.get_matching_degree(X)
 
     res = minimize(obj_function, [1,1], args=good_rule, bounds=[(0,1), (0,1)])
-    assert res['success'] == True
+    assert res['success']
     assert - res['fun'] <= 1
 
     res = minimize(obj_function, [1,1], args=bad_rule, bounds=[(0,1), (0,1)])
-    assert res['success'] == True
+    assert res['success']
     assert - res['fun'] <= 1
 
     # vanishing input
