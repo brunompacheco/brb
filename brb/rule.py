@@ -1,3 +1,5 @@
+"""Models a belief rule and associated operations.
+"""
 from typing import List, Dict, Any, Union, Callable
 from warnings import warn
 
@@ -11,7 +13,7 @@ class Rule():
     """A rule definition in a BRB system.
 
     It translates expert knowledge into a mapping between the antecedents and
-    the consequents. We assume that it is defined as a pure AND rules, that is,
+    the consequents. We assume that it is defined as a pure AND rule, that is,
     the only logical relation between the input attributes is the AND function.
 
     Attributes:
@@ -52,7 +54,7 @@ class Rule():
 
         self.matching_degree = matching_degree
 
-    def get_antecedent_matching(self, U_i, X) -> float:
+    def get_antecedent_matching(self, U_i: Any, X: AttributeInput) -> float:
         """Quantifies matching of an input to the rules' referential value.
 
         Args:
@@ -72,7 +74,22 @@ class Rule():
         return self._get_antecedent_matching(_X_i, _A_i, X_i, A_i)
 
     @staticmethod
-    def _get_antecedent_matching(_X_i, _A_i, X_i=None, A_i=None):
+    def _get_antecedent_matching(_X_i, _A_i, X_i=None, A_i=None) -> float:
+        """Calculates match level between the two inputs.
+
+        Args:
+            _X_i: Input referential value already in a data type that the model
+            handles (see `AttributeInput.prep_referential_value`).
+            _A_i: Rule antecedent referential value already in a data type that
+            the model handles (see `AttributeInput.prep_referential_value`).
+            X_i: If provided, will be understood as the string representation of
+            `_X_i`.
+            A_i: If provided, will be understood as the string representation of
+            `_A_i`.
+        Returns:
+            match: Bounded between 0.0 and 1.0, represents the match between the
+            two inputs.
+        """
         if X_i is None:
             X_i = _X_i
 
@@ -167,6 +184,8 @@ class Rule():
             delta: Dict[str, float],
             alphas_i: Dict[str, float]
         ) -> float:
+        """Computes arithmetic average of the antecedents' matching degrees.
+        """
         norm_delta = {attr: d / sum(delta.values()) for attr, d
                       in delta.items()}
         weighted_alpha = [
@@ -180,6 +199,8 @@ class Rule():
             delta: Dict[str, float],
             alphas_i: Dict[str, float]
         ) -> float:
+        """Computes geometric average of the antecedents' matching degrees.
+        """
         norm_delta = {attr: d / max(delta.values()) for attr, d
                       in delta.items()}
         weighted_alpha = [
