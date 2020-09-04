@@ -1,82 +1,11 @@
-from ast import literal_eval
 from typing import List, Dict, Any, Union, Callable
 from warnings import warn
 
 import numpy as np
 
-from interval import interval, inf
+from interval import interval
 
-from .attr_input import AttributeInput
-
-
-def _prep_referential_value(X_i):
-    """Converts pythonic string input to acceptable data type.
-    """
-    try:
-        # TODO: rewrite code based on `literal_eval` application on the input
-        _X_i = literal_eval(X_i)
-    except (ValueError, SyntaxError):
-        _X_i = X_i
-
-    if isinstance(_X_i, str):
-        # strips whitespaces from the inputs
-        _X_i = _X_i.strip()
-
-        # converts to numeric if so
-        if is_numeric(_X_i):
-            try:
-                _X_i = int(_X_i)
-            except ValueError:
-                _X_i = float(_X_i)
-        else:
-            # if not numeric, try interval
-            try:
-                _X_i = str2interval(_X_i)
-            except:
-                # if not interval, then understand it as string/categorical
-                return X_i
-
-    return _X_i
-
-def str2interval(value: str):
-    _value = value.strip()
-
-    INTERVAL_SEP = ':'
-    BT_SEP = '>'
-    ST_SEP = '<'
-    if INTERVAL_SEP in _value:
-        start, end = _value.split(INTERVAL_SEP)
-    elif BT_SEP in _value:
-        start = _value.split(BT_SEP)[-1]
-        end = inf
-    elif ST_SEP in _value:
-        start = -inf
-        end = _value.split(ST_SEP)[-1]
-    else:
-        raise ValueError('`{}` is not a proper interval'.format(value))
-
-    try:
-        if start is not -inf:
-            start = int(start)
-        if end is not inf:
-            end = int(end)
-    except ValueError:
-        start = float(start)
-        end = float(end)
-
-    if isinstance(start, int) and isinstance(end, int):
-        value_interval = set(range(start, end + 1))
-    else:
-        value_interval = interval[start, end]
-
-    return value_interval
-
-def is_numeric(a):  # pylint: disable=missing-function-docstring
-    try:
-        float(a)
-        return True
-    except:
-        return False
+from .attr_input import AttributeInput, is_numeric
 
 class Rule():
     """A rule definition in a BRB system.
@@ -123,25 +52,34 @@ class Rule():
 
         self.matching_degree = matching_degree
 
-    @staticmethod
-    def get_antecedent_matching(A_i, X_i) -> float:
-        """Quantifies matching of an input and a referential value.
+    def get_antecedent_matching(self, U_i, X) -> float:
+        """Quantifies matching of an input to the rules' referential value.
 
         Args:
-            A_i: Referential value for antecedent U_i. Can be a category
-            (string), continuous or discrete numerical value.
-            X_i: Input value for antecedent U_i. Must be either a single value
-            that matches the Referential value or a dictionary that maps the
-            values to certainty.
+            U_i: Antecedent to compare.
+            X_i: Input to match to the rule.
 
         Returns:
             match: Between 0-1, quantifies how much `X_i` matches the
             referential value `A_i`.
         """
-        match = 0.0
+        X_i = X.attr_input[U_i]
+        A_i = self.A_values[U_i]
 
-        _X_i = _prep_referential_value(X_i)
-        _A_i = _prep_referential_value(A_i)
+        _X_i = X[U_i]
+        _A_i = X.prep_referential_value(A_i)
+
+        return self._get_antecedent_matching(_X_i, _A_i, X_i, A_i)
+
+    @staticmethod
+    def _get_antecedent_matching(_X_i, _A_i, X_i=None, A_i=None):
+        if X_i is None:
+            X_i = _X_i
+
+        if A_i is None:
+            A_i = _A_i
+
+        match = 0.0
 
         if is_numeric(_X_i):
             if is_numeric(_A_i):
@@ -210,9 +148,7 @@ class Rule():
         self._assert_input(X)
 
         alphas_i = {
-            U_i: self.get_antecedent_matching(
-                self.A_values[U_i], X.attr_input[U_i]
-            )
+            U_i: self.get_antecedent_matching(U_i, X)
             for U_i in self.A_values.keys()
         }
 
@@ -258,13 +194,7 @@ class Rule():
         """
         self._assert_input(X)
 
-        # sum of activations of the referential values for each antecedent
-        attribute_total_activations = {attr: sum(X.attr_input[attr].values())
-                                       for attr in X.attr_input.keys()}
-
-        rule_input_completeness = sum([attribute_total_activations[attr]
-                                       for attr in self.A_values.keys()]) \
-                                    / len(self.A_values.keys())
+        rule_input_completeness = X.get_completeness(self.A_values.keys())
 
         norm_beta = [belief * rule_input_completeness for belief in self.beta]
 
