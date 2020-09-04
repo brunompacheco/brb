@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+"""Command-line interface for BRB model creation and execution.
+
+While setup is not ready, use it as:
+    $ python -m brb.cli rules_file.csv
+"""
+
 import click
 
 from interval import interval, inf
@@ -12,6 +18,14 @@ from .attr_input import AttributeInput
 @click.option('--antecedent-prefix', type=click.STRING, default='A_')
 @click.option('--consequent-prefix', type=click.STRING, default='D_')
 def main(rules, antecedent_prefix, consequent_prefix):
+    """Creates a BRB model from rules defined in a csv file.
+
+    The script expects the csv file to have a header, below which each row must
+    describe one rule. Each column can be an antecedent or consequent (rule
+    weight and attribute weight still not implemented). The prefixes are used to
+    identify antecedents and consequents of the model, thus it is crucial that
+    they match the columns' names on the csv file.
+    """
     _main(rules, antecedent_prefix, consequent_prefix)
 
 def _main(rules, antecedent_prefix, consequent_prefix):
