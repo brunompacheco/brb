@@ -324,7 +324,7 @@ if __name__ == "__main__":
     # csv rule input
     rules_filepath = os.path.join(os.curdir, 'test_rules.csv')
 
-    csv_model = csv2BRB(rules_filepath, antecedent_cols=U, consequent_cols=D)
+    csv_model = csv2BRB(rules_filepath, antecedents_prefix='A_', consequents_prefix='D_')
 
     assert len(csv_model.rules) == len(model.rules)
 

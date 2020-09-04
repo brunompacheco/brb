@@ -79,7 +79,7 @@ class RuleBaseModel():
             self,
             rules_df: pd.DataFrame,
             thetas: str = None,
-            deltas_df: pd.DataFrame = None,
+            delta_cols: List[str] = None,
         ):
         """Adds rules from pandas.DataFrame object. Columns must agree to model.
 
@@ -88,8 +88,8 @@ class RuleBaseModel():
             be the antecedents, consequents and rule weights (optional).
             thetas: Rules weights column. If `None` (default value), same weight
             (1.0) is given to all rules.
-            deltas_df: Dataframe containing the attribute weights for each
-            rules.
+            delta_cols: Columns from `rules_df` containing the attribute
+            weights for each rule.
         """
         # TODO: add deltas input support
         antecedents_df = rules_df[self.U]
@@ -102,8 +102,9 @@ class RuleBaseModel():
             thetas = rules_df[thetas].values
 
         deltas = None
-        if deltas_df is not None:
-            deltas = deltas_df.values
+        # only valid if there are 1:1 weights to attributes
+        if delta_cols is not None and len(delta_cols) == len(self.U):
+            deltas = np.matrix(rules_df[delta_cols].values)
 
         self.add_rules_from_matrix(
             A_ks=A_ks,
@@ -265,12 +266,22 @@ class RuleBaseModel():
 
         return belief_degrees
 
+def match_prefix(s: str, p: str):
+    """Checks wether `p` is a prefix of `s`.
+    """
+    if p is None:
+        return True
+
+    s_p = s[:len(p)]
+
+    return s_p == p
+
 def csv2BRB(
-    csv_filepath: str,
-    antecedent_cols: List[str],
-    consequent_cols: List[str],
-    thetas: str = None,
-    deltas: List[str] = None
+        csv_filepath: str,
+        antecedents_prefix: str,
+        consequents_prefix: str,
+        deltas_prefix: str = None,
+        thetas: str = None,
     ) -> RuleBaseModel:
     """Converts csv table to a belief rule base (RuleBaseModel).
 
@@ -283,28 +294,40 @@ def csv2BRB(
 
     Args:
         csv_fillepath: csv filepath to the table containing the rules.
-        antecedent_cols: List of the column's names (as in the header of the
-        table) to be used as the antecedents.
-        consequent_cols: List of the column's names (as in the header of the
-        table) to be used as the consequents.
+        antecedents_prefix: Prefix of the antecedents' columns names (as in the
+        header of the table). Any column with this prefix will be understood as
+        an antecedent.
+        consequents_prefix: Prefix of the consequents' columns names (as in the
+        header of the table). Any column with this prefix will be understood as
+        an consequent.
+        deltas_prefix: Prefix of the attribute weights' columns names (as in the
+        header of the table). Exactly one column for each attribute must be
+        provided. If `None` (default), will assign equal weight (1.0) to all
+        attributes for every rule.
         thetas: Column name of the rules weights. If `None` (default), will
         assign equal weight (1.0) to all rules.
-        deltas: Columns names of the attributes weights of each rule. Must be in
-        the same shape as the antecedents section of the table. If `None`
-        (default), will assign equal weight (1.0) to all attributes.
-    
+
     Returns:
         model: Belief Rule Base containing all the rules defined in the csv
         file.
     """
-    model = RuleBaseModel(U=antecedent_cols, D=consequent_cols)
-
     df_rules = pd.read_csv(csv_filepath)
 
-    deltas_df = deltas
-    if deltas is not None:
-        deltas_df = df_rules[deltas]
+    cols = df_rules.columns
 
-    model.add_rules_from_df(df_rules, thetas=thetas, deltas_df=deltas_df)
+    antecedent_cols = list()
+    consequent_cols = list()
+    delta_cols = list()
+    for col in cols:
+        if match_prefix(col, antecedents_prefix):
+            antecedent_cols.append(col)
+        elif match_prefix(col, consequents_prefix):
+            consequent_cols.append(col)
+        elif match_prefix(col, deltas_prefix):
+            delta_cols.append(col)
+
+    model = RuleBaseModel(U=antecedent_cols, D=consequent_cols)
+
+    model.add_rules_from_df(df_rules, thetas=thetas, delta_cols=delta_cols)
 
     return model
