@@ -271,7 +271,7 @@ def match_prefix(s: str, p: str):
     if p is None:
         return True
 
-    s_p = s[:len(p)]
+    s_p = s.lstrip()[:len(p)]
 
     return s_p == p
 
@@ -322,8 +322,9 @@ def csv2BRB(
             antecedent_cols.append(col)
         elif match_prefix(col, consequents_prefix):
             consequent_cols.append(col)
-        elif match_prefix(col, deltas_prefix):
-            delta_cols.append(col)
+        elif deltas_prefix is not None:
+            if match_prefix(col, deltas_prefix):
+                delta_cols.append(col)
 
     model = RuleBaseModel(U=antecedent_cols, D=consequent_cols)
 
