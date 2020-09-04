@@ -5,9 +5,9 @@ import pandas as pd
 from scipy.optimize import minimize
 from interval import interval
 
-from brb.attr_input import AttributeInput
+from brb.attr_input import AttributeInput, str2interval
 from brb.brb import RuleBaseModel, csv2BRB
-from brb.rule import Rule, str2interval, _prep_referential_value
+from brb.rule import Rule
 
 if __name__ == "__main__":
     # setup for simple tests
@@ -216,28 +216,28 @@ if __name__ == "__main__":
         # easy referential values
         (['A', 'A'], 1.0),
         (['A', 'B'], 0.0),
-        (['12', 12], 1.0),
-        ([12, '9'], 0.0),
+        ([12, 12], 1.0),
+        ([12, 9], 0.0),
         # uncertain input
         (['A', {'A': 0.7, 'B': 0.3}], 0.7),
-        (['A', "{'A': 0.7, 'B': 0.3}"], 0.7),
         # interval referential values
-        (['1:2', '1:2'], 1.0),
-        (['1.0:2.0', '1.0:2.0'], 1.0),
-        (['1:2', '2:3'], 0.5),
-        (['1.0:2.0', '2.0:3.0'], 0.0),
-        (['1:2', '3:4'], 0.0),
-        (['1.0:2.0', '1.5:2.5'], 0.5),
-        (['1.5:2.0', '1.5:2.5'], 0.5),
-        (['1.0:2.0', '1.5:2.0'], 1.0),
+        ([{1,2}, {1,2}], 1.0),
+        ([{1,2}, {2,3}], 0.5),
+        ([{1,2}, {3,4}], 0.0),
+        ([interval[1,2], interval[1,2]], 1.0),
+        ([interval[1,2], interval[2,3]], 0.0),
+        ([interval[1,2], interval[3,4]], 0.0),
+        ([interval[1,2], interval[1.5,2.5]], 0.5),
+        ([interval[1.5,2], interval[1.5,2.5]], 0.5),
+        ([interval[1,2], interval[1.5,2.0]], 1.0),
         # mixed
-        (['1:2', '2'], 1.0),
-        (['1:2', 3], 0.0),
-        (['1.0:2.0', '2'], 1.0),
-        (['1.0:2.0', 3], 0.0),
+        ([{1,2}, 2], 1.0),
+        ([{1,2}, 3], 0.0),
+        ([interval[1,2], 2], 1.0),
+        ([interval[1,2], 3], 0.0),
     ]
     for antecedents, expected_match in antecedents_matchings:
-        assert Rule.get_antecedent_matching(*antecedents) == expected_match
+        assert Rule._get_antecedent_matching(antecedents[1], antecedents[0]) == expected_match
 
     # referential value preparation
     referential_values = [
@@ -255,7 +255,7 @@ if __name__ == "__main__":
         ({'A':0.6, 'B': 0.4}, dict),
     ]
     for referential_value, refv_type in referential_values:
-        assert isinstance(_prep_referential_value(referential_value), refv_type)
+        assert isinstance(AttributeInput.prep_referential_value(referential_value), refv_type)
 
     # interval-based rules
     model = RuleBaseModel(
@@ -327,5 +327,32 @@ if __name__ == "__main__":
     csv_model = csv2BRB(rules_filepath, antecedents_prefix='A_', consequents_prefix='D_')
 
     assert len(csv_model.rules) == len(model.rules)
+
+    # AttributeInput
+    expected_ref_value_conversions = [
+        (12, int),
+        ('12', int),
+        (12.0, float),
+        ('12.0', float),
+        ('asdf', str),
+        ('1:2', set),
+        ('1.0:2', interval),
+        ('1.0:2.0', interval),
+        ('>1', interval),
+        ('<1', interval),
+        ({'A': 0.5, 'B':0.5}, dict),
+        ("{'A': 0.5, 'B':0.5}", dict),
+    ]
+    for X_i, expected_type in expected_ref_value_conversions:
+        assert isinstance(AttributeInput.prep_referential_value(X_i), expected_type)
+
+    X = AttributeInput({
+        'A_1': 12,
+        'A_2': {'y': 0.5, 'n':0.0},
+        'A_3': '1:2',
+    })
+    assert X.get_completeness(['A_1', 'A_3']) == 1.0
+    assert X.get_completeness(['A_2']) == 0.5
+    assert X.get_completeness(['A_2', 'A_3']) == 0.75
 
     print('Success!')
