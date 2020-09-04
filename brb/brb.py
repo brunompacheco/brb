@@ -7,10 +7,9 @@ approach.
 
     Typical usage example:
 
-    >>> from brb.brb import RuleBaseModel, Rule, AttributeInput
+    >>> from brb import RuleBaseModel, Rule, AttributeInput
     >>> model = RuleBaseModel(
     ...     U=['Antecedent'],
-    ...     A={'Antecedent': ['good', 'bad']},
     ...     D=['good', 'bad']
     ... )
     >>> model.add_rule(Rule(
