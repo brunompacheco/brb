@@ -101,11 +101,14 @@ class Rule():
                 # For this scenario, we quantify the match as the amount of the
                 # input that is contained in the referential value.
                 intrsc = _A_i & _X_i
-                intrsc_length = intrsc[0][1] - intrsc[0][0]
+                try:
+                    intrsc_length = intrsc[0][1] - intrsc[0][0]
 
-                _X_i_length = _X_i[0][1] - _X_i[0][0]
+                    _X_i_length = _X_i[0][1] - _X_i[0][0]
 
-                match = float(intrsc_length / _X_i_length)
+                    match = float(intrsc_length / _X_i_length)
+                except IndexError:  # intersection is empty
+                    match = 0.0
         elif isinstance(_X_i, set):
             if is_numeric(_A_i):
                 # Same as the case for interval input and numeric reference.
