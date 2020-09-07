@@ -1,0 +1,11 @@
+rule_id,rule_weight,A_DimHPs,A_CondHPSpace,A_#continuousHPsofMLalg.,A_NumFuncEvals/NumMaxTrials,A_MLalg,A_MLtaskDataset,A_ArtificialNoiseInDataset,A_SurrogateBenchmarking,A_MLTask,D_GP-BO,D_BOHAMIANN
+1,,2,no,0,<100,SVM,16 OpenML classification datasets,no,yes,Classification,1,0
+2,,2,no,0,<40,SVM,16 OpenML classification datasets,yes,yes,Classification,1,0
+3,,2,no,0,40:100,SVM,16 OpenML classification datasets,yes,yes,Classification,0,1
+4,,6,no,>=1,<50,2-Layer FC-Net,16 OpenML classification datasets,no,yes,Classification,0,1
+5,,6,no,>=1,50:100,2-Layer FC-Net,16 OpenML classification datasets,no,yes,Classification,1,0
+6,,6,no,>=1,<100,2-Layer FC-Net,16 OpenML classification datasets,yes,yes,Classification,0,1
+7,,8,no,>=1,<30,XGBoost,10 UCI Regression datasets,no,yes,Regression,0,1
+8,,8,no,>=1,30:100,XGBoost,10 UCI Regression datasets,no,yes,Regression,1,0
+9,,8,no,>=1,<30,XGBoost,10 UCI Regression datasets,yes,yes,Regression,0,1
+10,,8,no,>=1,30:100,XGBoost,10 UCI Regression datasets,yes,yes,Regression,1,0
