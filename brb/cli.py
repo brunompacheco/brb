@@ -43,25 +43,26 @@ def _main(rules, antecedent_prefix, consequent_prefix):
     for U_i in model.U:
         attr_values[U_i] = set()
         for rule in model.rules:
-            A_i = rule.A_values[U_i]
+            if U_i in rule.A_values.keys():
+                A_i = rule.A_values[U_i]
 
-            # format string version
-            if isinstance(A_i, interval):
-                A_i = A_i[0]  # only first component is considered, always
-                if A_i[0] == -inf:
-                    A_i = '<{}'.format(A_i[-1])
-                elif A_i[1] == inf:
-                    A_i = '>{}'.format(A_i[0])
+                # format string version
+                if isinstance(A_i, interval):
+                    A_i = A_i[0]  # only first component is considered, always
+                    if A_i[0] == -inf:
+                        A_i = '<{}'.format(A_i[-1])
+                    elif A_i[1] == inf:
+                        A_i = '>{}'.format(A_i[0])
+                    else:
+                        A_i = '{}:{}'.format(*A_i)
+                elif isinstance(A_i, set):
+                    A_i = '{}:{}'.format(min(A_i), max(A_i))
                 else:
-                    A_i = '{}:{}'.format(*A_i)
-            elif isinstance(A_i, set):
-                A_i = '{}:{}'.format(min(A_i), max(A_i))
-            else:
-                A_i = str(A_i)
+                    A_i = str(A_i)
 
-            assert isinstance(A_i, str)
+                assert isinstance(A_i, str)
 
-            attr_values[U_i].add(A_i)
+                attr_values[U_i].add(A_i)
 
     # get rule input
     print('\nPlease enter the antecedents values (examples between brackets)\n')
