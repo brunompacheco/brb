@@ -182,6 +182,55 @@ class RuleBaseModel():
 
     # TODO: add interface for "tunable" parameters
 
+    def compute_combined_belief(self, ubetas, actweights):
+        """Computes combined belief degrees based on Xu2011.
+
+        Based on the approach of the analytical ER algorithm in
+        "An introduction and survey of the evidential reasoning
+        approach for multiple criteria decision analysis" by
+        _Xu et al._.
+
+        Args:
+            actweights: activation weights computed in the 3rd
+            step of the run() method
+            ubetas: updated belief degrees as they are computed
+            in 4th step of the run() method
+            .
+        """
+
+        combined_belief = []
+        for idx, d in enumerate(self.D):
+            left_prod_num = 1
+            right_prod_num = 1
+            mid_prod_den = len(self.D) - 1
+            right_prod_den = 1
+            left_prods_den = []
+
+            for k in range(len(ubetas)):
+                total_belief_k = sum([beta_d for i, beta_d in enumerate(ubetas[k])])
+                total_belief_k_wo_d = sum([beta_d if i != idx else 0 for i, beta_d in enumerate(ubetas[k])])
+
+                left_prod_num *= (1 - actweights[k] * total_belief_k_wo_d)
+                right_prod_num *= (1 - actweights[k] * total_belief_k)
+                right_prod_den *= (1 - actweights[k])
+
+            mid_prod_den *= right_prod_num
+
+            for idx2, d2 in enumerate(self.D):
+                left_prod_den = 1
+
+                for k2 in range(len(ubetas)):
+                    total_belief_k_wo_d2 = sum([beta_d if i2 != idx2 else 0 for i2, beta_d in enumerate(ubetas[k2])])
+
+                    left_prod_den *= (1 - actweights[k2] * total_belief_k_wo_d2)
+
+                left_prods_den.append(left_prod_den)
+
+            combined_belief.append((left_prod_num - right_prod_num)
+                                   / (np.nansum(left_prods_den) - mid_prod_den - right_prod_den))
+
+        return combined_belief
+
     def run(self, X: AttributeInput):
         """Infer the output based on the RIMER approach.
 
@@ -197,6 +246,7 @@ class RuleBaseModel():
         Args:
             X: Attribute's data to be fed to the rules.
         """
+
         # input for all valid antecedents must be provided
         for U_i in X.attr_input.keys():
             assert U_i in self.U
@@ -211,7 +261,9 @@ class RuleBaseModel():
         # _Yang et al._
 
         # total_theta_alpha is the sum on the denominator of said equation
-        total_theta_alpha = sum([rule.theta*alpha_k for rule, alpha_k
+        #total_theta_alpha = sum([rule.theta * alpha_k for rule, alpha_k
+        #                               in zip(self.rules, alphas)])
+        total_theta_alpha = np.nansum([rule.theta * alpha_k for rule, alpha_k
                                  in zip(self.rules, alphas)])
         total_theta_alpha = total_theta_alpha if total_theta_alpha != 0 else 1
 
@@ -228,10 +280,11 @@ class RuleBaseModel():
 
         # sum of all belief degrees over the rules
         total_belief_degrees = [sum(beta_k) for beta_k in belief_degrees]
-
+        combined_bel_degrees = self.compute_combined_belief(belief_degrees, activation_weights)
         # left_prods is the productory that appears both in the left-side
         # of the numerator of eq. (4) and in \mu. Note that this depends on j
         left_prods = list()
+
         # map is a transposition of belief_degrees
         for rules_beta_j in map(list, zip(*belief_degrees)):
             left_prods.append(np.prod(
@@ -263,7 +316,7 @@ class RuleBaseModel():
 
         # TODO: add utility calculation
 
-        return belief_degrees
+        return belief_degrees, combined_bel_degrees
 
 def match_prefix(s: str, p: str):
     """Checks wether `p` is a prefix of `s`.
