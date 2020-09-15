@@ -18,7 +18,19 @@ def enter_custom_input(A_i, X_i):
             user_inputs[idx] = 0
     return user_inputs
 
-def random_existing_input(model, num_runs):
+def random_existing_input(model, num_runs, incomplete):
+    """Creates a random input using the referential
+    values that are exisiting in the rule base.
+
+    Args:
+        model: model to create input from.
+        num_runs: number of runs to evaluate.
+        incomplete: takes bool or float between 0 and 1.
+            if bool, '' is added to the list of referential
+            values that is randomly chosen from. if float,
+            this is the probability that the input for a certain
+            antecedent is empty.
+    """
 
     # create random test inputs using referential values identical with existing ones in the rule base
     res = []
@@ -35,7 +47,19 @@ def random_existing_input(model, num_runs):
                 if U_i in rule.A_values:
                     ref_vals.append(rule.A_values[U_i]) if rule.A_values[U_i] not in ref_vals else ref_vals
             if len(ref_vals) > 0:
-                attr_input[U_i] = random.choice(ref_vals)
+
+                # enables random incomplete input
+                if incomplete == True:
+                    ref_vals.append('')
+                    attr_input[U_i] = random.choice(ref_vals)
+                elif isinstance(incomplete, float):
+                    random_val = random.random()
+                    if incomplete > random_val:
+                        attr_input[U_i] = ''
+                    else:
+                        attr_input[U_i] = random.choice(ref_vals)
+                else:
+                    attr_input[U_i] = random.choice(ref_vals)
 
         # get recommendation for input
         X = AttributeInput(attr_input)
@@ -73,7 +97,8 @@ def random_existing_input(model, num_runs):
                           sorted(boxplot_data_place.items(), key=lambda i: sum(i[1]), reverse=False)}
 
     # plotting results in boxplot
-    title = '{} run(s) on a randomly created, complete input of existing values'.format(num_runs)
+    complete = 'incomplete' if incomplete == True else 'complete'
+    title = '{} run(s) on a randomly created, {} input of existing values'.format(num_runs, complete)
     boxplot_results(boxplot_data, title)
     boxplot_results(boxplot_data_place, title)
 
@@ -126,7 +151,6 @@ def custom_input(model, input):
     title = 'Custom input'
     boxplot_results(boxplot_data, title)
     boxplot_results(boxplot_data_place, title)
-
 
 def boxplot_results(data: List[any], title):
     _data = [np.asarray(results) for results in data.values()]
@@ -185,7 +209,7 @@ inputs_BRB_v3 = {
     'A_Conditional HP space':
         [''],
     'A_#continuous HPs of ML alg.':
-        [''],
+        ['>=1'],
     'A_Obtainability of gradients':
         [''],
     'A_Dataset (name)':
@@ -210,10 +234,10 @@ if __name__ == "__main__":
     print('Model created')
 
     # test with random, existing inputs
-    #random_existing_input(model, 10)
+    random_existing_input(model, 100, incomplete=0.8)
 
     # test with custom inputs
-    custom_input(model, inputs_BRB_v3)
+    #custom_input(model, inputs_BRB_v3)
     '''
     # create random test inputs using new referential values
     print('\nindividual test inputs')
