@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from scipy.optimize import minimize
-from interval import interval
+from interval import interval, inf
 
 from brb.attr_input import AttributeInput, str2interval
 from brb.brb import RuleBaseModel, csv2BRB
@@ -230,11 +230,17 @@ if __name__ == "__main__":
         ([interval[1,2], interval[1.5,2.5]], 0.5),
         ([interval[1.5,2], interval[1.5,2.5]], 0.5),
         ([interval[1,2], interval[1.5,2.0]], 1.0),
+        # infinite intervals
+        ([interval[1,inf], interval[1.5,50]], 1.0),
+        ([interval[1,inf], interval[0,2]], 0.5),
         # mixed
         ([{1,2}, 2], 1.0),
         ([{1,2}, 3], 0.0),
         ([interval[1,2], 2], 1.0),
         ([interval[1,2], 3], 0.0),
+        ([interval[2.5, 4.5], {1,2,3,4}], 0.5),
+        ([interval[0.5, 4.5], {1,2,3,4}], 1.0),
+        ([interval[2.5, 4.5], {1,2}], 0.0),
     ]
     for antecedents, expected_match in antecedents_matchings:
         assert Rule._get_antecedent_matching(antecedents[1], antecedents[0]) == expected_match
