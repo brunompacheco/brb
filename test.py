@@ -235,6 +235,9 @@ if __name__ == "__main__":
         ([{1,2}, 3], 0.0),
         ([interval[1,2], 2], 1.0),
         ([interval[1,2], 3], 0.0),
+        ([interval[2.5, 4.5], {1,2,3,4}], 0.5),
+        ([interval[0.5, 4.5], {1,2,3,4}], 1.0),
+        ([interval[2.5, 4.5], {1,2}], 0.0),
     ]
     for antecedents, expected_match in antecedents_matchings:
         assert Rule._get_antecedent_matching(antecedents[1], antecedents[0]) == expected_match

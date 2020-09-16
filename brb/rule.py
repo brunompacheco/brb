@@ -137,10 +137,22 @@ class Rule():
 
                 match = float(intrsc_length / _X_i_length)
             elif isinstance(_A_i, interval):
+                # Problems might occur due to the nature of the intervals,
+                # e.g., if X_i is {1,2} and A_i is [2,3], this would result in a
+                # 0.50 match, even though the intervals share only their upper
+                # boundary.
                 warn((
                     'comparison between integer interval input `{}` and '
-                    'continuous interval `{}` not supported.'
+                    'continuous interval `{}` is not advised, results might '
+                    'not match the expectations.'
                 ).format(X_i, A_i))
+
+                intrsc_length = sum([
+                    _X_i_element in _A_i for _X_i_element in _X_i
+                ])
+                _X_i_length = len(_X_i)
+
+                match = float(intrsc_length / _X_i_length)
         elif isinstance(_X_i, dict):
             if isinstance(_A_i, str) or is_numeric(_A_i):
                 match = float(_X_i[_A_i])
@@ -155,6 +167,8 @@ class Rule():
             warn('Input {} mismatches the referential value {}'.format(
                 X_i, A_i
             ))
+
+        assert isinstance(match, float)
 
         return match
 
