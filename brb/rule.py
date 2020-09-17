@@ -5,7 +5,7 @@ from warnings import warn
 
 import numpy as np
 
-from interval import interval
+from interval import interval, inf
 
 from .attr_input import AttributeInput, is_numeric
 
@@ -123,9 +123,16 @@ class Rule():
 
                     _X_i_length = _X_i[0][1] - _X_i[0][0]
 
-                    match = float(intrsc_length / _X_i_length)
+                    if intrsc_length == inf and _X_i_length == inf:
+                        if _X_i[0][1] == inf and _A_i[0][0] <= _X_i[0][0]:
+                            match = 1.0
+                        else:
+                            match = 0.0
+                    else:
+                        match = float(intrsc_length / _X_i_length)
                 except IndexError:  # intersection is empty
                     match = 0.0
+
         elif isinstance(_X_i, set):
             if is_numeric(_A_i):
                 # Same as the case for interval input and numeric reference.
@@ -137,10 +144,15 @@ class Rule():
 
                 match = float(intrsc_length / _X_i_length)
             elif isinstance(_A_i, interval):
+                '''
                 warn((
                     'comparison between integer interval input `{}` and '
                     'continuous interval `{}` not supported.'
                 ).format(X_i, A_i))
+                '''
+                _X_i = list(_X_i)
+                if _A_i[0][0] <= _X_i[0] and _A_i[0][1] >= _X_i[-1]:
+                    match = 1.0
         elif isinstance(_X_i, dict):
             if isinstance(_A_i, str) or is_numeric(_A_i):
                 match = float(_X_i[_A_i])
@@ -155,7 +167,9 @@ class Rule():
             warn('Input {} mismatches the referential value {}'.format(
                 X_i, A_i
             ))
-
+        if np.isnan(match):
+            print('nan just created')
+            print('why does he stop here')
         return match
 
     def get_matching_degree(self, X: AttributeInput) -> float:
@@ -171,7 +185,11 @@ class Rule():
             U_i: self.get_antecedent_matching(U_i, X)
             for U_i in self.A_values.keys()
         }
-
+        try:
+            if np.isnan(np.sum([val for val in alphas_i.values()])):
+                print('alphas_i contains nans')
+        except:
+            print('couldn\'t go into try')
         if self.matching_degree == 'geometric':
             return self._geometric_matching_degree(self.delta, alphas_i)
         elif self.matching_degree == 'arithmetic':

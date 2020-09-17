@@ -261,10 +261,10 @@ class RuleBaseModel():
         # _Yang et al._
 
         # total_theta_alpha is the sum on the denominator of said equation
-        #total_theta_alpha = sum([rule.theta * alpha_k for rule, alpha_k
-        #                               in zip(self.rules, alphas)])
-        total_theta_alpha = np.nansum([rule.theta * alpha_k for rule, alpha_k
-                                 in zip(self.rules, alphas)])
+        total_theta_alpha = sum([rule.theta * alpha_k for rule, alpha_k
+                                       in zip(self.rules, alphas)])
+        #total_theta_alpha = np.nansum([rule.theta * alpha_k for rule, alpha_k
+        #                         in zip(self.rules, alphas)])
         total_theta_alpha = total_theta_alpha if total_theta_alpha != 0 else 1
 
         # activation_weights[k] = w_k = activation weight of the k-th rule
@@ -280,7 +280,7 @@ class RuleBaseModel():
 
         # sum of all belief degrees over the rules
         total_belief_degrees = [sum(beta_k) for beta_k in belief_degrees]
-        combined_bel_degrees = self.compute_combined_belief(belief_degrees, activation_weights)
+        # combined_bel_degrees = self.compute_combined_belief(belief_degrees, activation_weights)
         # left_prods is the productory that appears both in the left-side
         # of the numerator of eq. (4) and in \mu. Note that this depends on j
         left_prods = list()
@@ -316,7 +316,7 @@ class RuleBaseModel():
 
         # TODO: add utility calculation
 
-        return belief_degrees, combined_bel_degrees
+        return belief_degrees
 
 def match_prefix(s: str, p: str):
     """Checks wether `p` is a prefix of `s`.

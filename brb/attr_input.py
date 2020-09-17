@@ -39,7 +39,7 @@ def str2interval(value: str) -> Union[interval, set]:
         start = _value.split(BT_SEP)[-1]
         end = inf
     elif ST_SEP in _value:
-        start = -inf
+        start = 0
         end = _value.split(ST_SEP)[-1]
     else:
         raise ValueError('`{}` is not a proper interval'.format(value))

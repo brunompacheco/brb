@@ -1,0 +1,116 @@
+,rule_id,rule_weight,A_UR: quality demands,A_UR: computational efficiency of the HPO technique,A_User's programming ability,A_Access to parallel computing,A_Production use case,A_Time Resources,A_Number of maximum function evaluations/ trials budget,A_Cummulative Budget,A_Wall Clock Time [s],A_Running time per trial [s],A_Machine Learning Algorithm,A_Obtainability of good approximate,A_Supports parallel evaluations,A_Usage of one-hot encoding for cat. features,A_Dimensionality of HPs,A_Conditional HP space,A_#continuous HPs of ML alg.,A_Obtainability of gradients,A_Dataset (name),A_Number of instances in dataset,A_Artificial noise in dataset,A_Surrogate benchmarking,A_Validation,A_ML task,D_Default Values,D_Random Search,D_Grid Search,D_SMAC,D_TPE,D_BO-GP BO,D_BO-Fabolas,D_BO-Spearmint GP,D_BO-MTBO,D_BO-BOHAMIANN,D_HP-LCNet,D_HB-Hyperband,D_BOHB,D_Population based,D_Gradient based,D_Approximation based
+0,1,,low,,,,Predictive Quality,,,,,,,,,,,,,,,,,,,,1.00000,,,,,,,,,,,,,,,
+1,2,,high,,,,Predictive Quality,large,,,,,,,,,,,,,,,,,,,,1.00000,,,,,,,,,,,,,,
+2,3,,high,,high,,Predictive Quality,low,,,,,,,,,,,,yes,,,,,,,,,,,,,,,,,,,,,1.00000,
+3,4,,high,,high,,Predictive Quality,low,,,,,,yes,,,,,,no,,,,,,,,,,,,,,,,,,,,,,1.00000
+4,5,,high,,medium,,Predictive Quality,low,high,,,,,,no,,,,>=1,,,,,,,,,,,,,,,,,,,,,1.00000,,
+5,6,,high,,medium,,Predictive Quality,low,high,,,,,,no,,,,0,,,,,,,,,,,0.50000,0.50000,,,,,,,,,,,
+6,7,,high,,medium,,Predictive Quality,low,low,,,,,,no,,,,,,Adult (OpenML),,,,,,,,,0.50000,0.50000,,,,,,,,,,,
+7,8,,high,,medium,,Predictive Quality,low,,,,,,,yes,,high,,0,,Optdigits (OpenML),,,,,,,,,0.50000,0.50000,,,,,,,,,,,
+8,9,,high,,medium,,Predictive Quality,low,,,,,,,yes,,low,,>=1,,,,,,,,,,,,,1.00000,,,,,,,,,,
+9,10,,high,,high,,Predictive Quality,low,high,,,,,no,no,,,,>=1,no,,,,,,,,,,,,,,,,,,,,1.00000,,
+10,11,,high,,high,,Predictive Quality,low,high,,,,,no,no,,,,0,no,,,,,,,,,,0.50000,0.50000,,,,,,,,,,,
+11,12,,high,,high,,Predictive Quality,low,low,,,,,no,no,,,,,no,,,,,,,,,,0.50000,0.50000,,,,,,,,,,,
+12,13,,high,,high,,Predictive Quality,low,,,,,,no,yes,,high,,0,no,,,,,,,,,,0.50000,0.50000,,,,,,,,,,,
+13,14,,high,,high,,Predictive Quality,low,,,,,,no,yes,,low,,>=1,no,,,,,,,,,,,,1.00000,,,,,,,,,,
+14,15,,,,low,,Predictive Maintenance,,,,,,,,,,,,,,,,,,,,,1.00000,,,,,,,,,,,,,,
+15,16,,,,medium:high,,Predictive Maintenance,,,,,<10,,,,,,,,,,,,,,,,0.50000,,,,,,,,,,,,0.50000,,
+16,17,,,,medium:high,,Predictive Maintenance,,,,,>100,,,,,,,,,,,,,,,,,,,,,,,,,,,0.50000,,,0.50000
+17,18,,,,medium:high,yes,Predictive Maintenance,,,,,10:100,,,,,,,,,,,,,,,,,,,,,,,,,,,,1.00000,,
+18,19,,,,medium:high,no,Predictive Maintenance,,>=200,,,10:100,,,,,,,,,,,,,,,,0.50000,,,,,,,,,,,,0.50000,,
+19,20,,,,medium:high,no,Predictive Maintenance,,<200,,,10:100,,,,,>10,yes,,,,,,,,,,,,,1.00000,,,,,,,,,,,
+20,21,,,,medium:high,no,Predictive Maintenance,,<200,,,10:100,,,,,>10,no,,,,,,,,,,,,1.00000,,,,,,,,,,,,
+21,22,,,,medium:high,no,Predictive Maintenance,,<200,,,10:100,,,,,<11,,>=1,,,,,,,,,,,,,1.00000,,,,,,,,,,
+22,23,,,,medium:high,no,Predictive Maintenance,,<200,,,10:100,,,,,<11,no,0,,,,,,,,,,,1.00000,,,,,,,,,,,,
+23,24,,,,medium:high,no,Predictive Maintenance,,<200,,,10:100,,,,,<11,yes,,,,,,,,,,,,,1.00000,,,,,,,,,,,
+24,25,,high,,,,,,,,,,,,,,,,,,,,,,,,,,,0.25000,0.25000,0.25000,,,,,,,0.25000,,,
+25,26,,,,,,,,,,,,,,,,high,,,,,,,,,,,,,0.25000,0.25000,,,,,,,0.25000,0.25000,,,
+26,27,,,,,,,,,,,,,,,,,yes,>=1,,,,,,,,,0.16667,0.16667,0.16667,0.16667,,,,,,,0.16667,0.16667,,,
+27,28,,,high,,,,,,,,,,,,,,,,,,,,,,,,0.33333,,,,,,,,,,0.33333,0.33333,,,
+28,29,,high,,,,Process Parameter Prediction,,,,<200,,XGBoost,,,no categorical features,6,no,>=1,,Blisk Milling (Florian Schlaich),,,,k = 3 k-fold CV,Time Series Prediction,1.00000,,,,,,,,,,,,,,,
+29,30,,high,,,,Process Parameter Prediction,,,,200:2000,,XGBoost,,,no categorical features,6,no,>=1,,Blisk Milling (Florian Schlaich),,,,k = 3 k-fold CV,Time Series Prediction,,0.33333,,0.33333,0.33333,,,,,,,,,,,
+30,31,,high,,,,Process Parameter Prediction,,,,>2000,,XGBoost,,,no categorical features,6,no,>=1,,Blisk Milling (Florian Schlaich),,,,k = 3 k-fold CV,Time Series Prediction,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250
+31,32,,high,,,,Process Parameter Prediction,,,,<2000,,Random Forest,,,no categorical features,6,no,>=1,,Blisk Milling (Florian Schlaich),,,,k = 3 k-fold CV,Time Series Prediction,,,,1.00000,,,,,,,,,,,,
+32,33,,high,,,,Process Parameter Prediction,,,,2000:5000,,Random Forest,,,no categorical features,6,no,>=1,,Blisk Milling (Florian Schlaich),,,,k = 3 k-fold CV,Time Series Prediction,,,,0.33333,0.33333,0.33333,,,,,,,,,,
+33,34,,high,,,,Process Parameter Prediction,,,,5000:10000,,Random Forest,,,no categorical features,6,no,>=1,,Blisk Milling (Florian Schlaich),,,,k = 3 k-fold CV,Time Series Prediction,,,,1.00000,,,,,,,,,,,,
+34,35,,high,,,,Process Parameter Prediction,,,,>10000,,Random Forest,,,no categorical features,6,no,>=1,,Blisk Milling (Florian Schlaich),,,,k = 3 k-fold CV,Time Series Prediction,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250
+35,36,,,,,,,,<2,,,,Latent Dirichlet Allocation,,,yes,3,no,>=1,,,,,,,Text,,,,,,,,1.00000,,,,,,,,
+36,37,,,,,,,,2:10,,,,Latent Dirichlet Allocation,,,yes,3,no,>=1,,,,,,,Text,,,,0.50000,,,,0.50000,,,,,,,,
+37,38,,,,,,,,>10,,,,Latent Dirichlet Allocation,,,yes,3,no,>=1,,,,,,,Text,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250
+38,39,,,,,,,,<2,,,,Logistic Regression,,,yes,4,no,>=1,,MNIST (OpenML),,,,"k = 1
+(no CV)",Image Recognition,,,,0.33333,0.33333,,,0.33333,,,,,,,,
+39,40,,,,,,,,2:50,,,,Logistic Regression,,,yes,4,no,>=1,,MNIST (OpenML),,,,"k = 1
+(no CV)",Image Recognition,,,,,,,,1.00000,,,,,,,,
+40,41,,,,,,,,>50,,,,Logistic Regression,,,yes,4,no,>=1,,MNIST (OpenML),,,,"k = 1
+(no CV)",Image Recognition,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250
+41,42,,,,,,,,<10,,,,Logistic Regression,,,yes,4,no,>=1,,MNIST (OpenML),,,,"k = 5
+k-fold CV",Image Recognition,,,,0.33333,0.33333,,,0.33333,,,,,,,,
+42,43,,,,,,,,10:100,,,,Logistic Regression,,,yes,4,no,>=1,,MNIST (OpenML),,,,"k = 5
+k-fold CV",Image Recognition,,,,,,,,1.00000,,,,,,,,
+43,44,,,,,,,,>100,,,,Logistic Regression,,,yes,4,no,>=1,,MNIST (OpenML),,,,"k = 5
+k-fold CV",Image Recognition,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250
+44,45,,,,,,,,<2,,,,Simple Neural Net,,,yes,14,yes,>=1,,convex (Larochelle2007),,,,"k = 1
+(no CV)",Image Recognition,,,,1.00000,,,,,,,,,,,,
+45,46,,,,,,,,2:20,,,,Simple Neural Net,,,yes,14,yes,>=1,,convex (Larochelle2007),,,,"k = 1
+(no CV)",Image Recognition,,,,0.50000,0.50000,,,,,,,,,,,
+46,47,,,,,,,,20:200,,,,Simple Neural Net,,,yes,14,yes,>=1,,convex (Larochelle2007),,,,"k = 1
+(no CV)",Image Recognition,,,,0.33333,0.33333,,,0.33333,,,,,,,,
+47,48,,,,,,,,<10,,,,Simple Neural Net,,,yes,14,yes,>=1,,convex (Larochelle2007),,,,"k = 5
+k-fold CV",Image Recognition,,,,1.00000,,,,,,,,,,,,
+48,49,,,,,,,,10:100,,,,Simple Neural Net,,,yes,14,yes,>=1,,convex (Larochelle2007),,,,"k = 5
+k-fold CV",Image Recognition,,,,0.50000,0.50000,,,,,,,,,,,
+49,50,,,,,,,,100:500,,,,Simple Neural Net,,,yes,14,yes,>=1,,convex (Larochelle2007),,,,"k = 5
+k-fold CV",Image Recognition,,,,1.00000,,,,,,,,,,,,
+50,51,,,,,,,,<2,,,,Simple Neural Net,,,yes,14,yes,>=1,,mrbi (mnist-rot-back-image) (Larochelle2007),,,,"k = 1
+(no CV)",Image Recognition,,,,1.00000,,,,,,,,,,,,
+51,52,,,,,,,,2:50,,,,Simple Neural Net,,,yes,14,yes,>=1,,mrbi (mnist-rot-back-image) (Larochelle2007),,,,"k = 1
+(no CV)",Image Recognition,,,,0.50000,0.50000,,,,,,,,,,,
+52,53,,,,,,,,50:200,,,,Simple Neural Net,,,yes,14,yes,>=1,,mrbi (mnist-rot-back-image) (Larochelle2007),,,,"k = 1
+(no CV)",Image Recognition,,,,0.33333,0.33333,,,0.33333,,,,,,,,
+53,54,,,,,,,,<5,,,,Simple Neural Net,,,yes,14,yes,>=1,,mrbi (mnist-rot-back-image) (Larochelle2007),,,,"k = 5
+k-fold CV",Image Recognition,,,,1.00000,,,,,,,,,,,,
+54,55,,,,,,,,5:50,,,,Simple Neural Net,,,yes,14,yes,>=1,,mrbi (mnist-rot-back-image) (Larochelle2007),,,,"k = 5
+k-fold CV",Image Recognition,,,,0.50000,0.50000,,,,,,,,,,,
+55,56,,,,,,,,,,,,Simple Neural Net,,,yes,14,yes,>=1,,mrbi (mnist-rot-back-image) (Larochelle2007),,,,"k = 5
+k-fold CV",Image Recognition,,,,1.00000,,,,,,,,,,,,
+56,57,,,,,,,,<5,,,,Deep Neural Net,,,yes,36,yes,>=1,,convex (Larochelle2007),,,,"k = 1
+(no CV)",Image Recognition,,,,,0.50000,,,0.50000,,,,,,,,
+57,58,,,,,,,,2:50,,,,Deep Neural Net,,,yes,36,yes,>=1,,convex (Larochelle2007),,,,"k = 1
+(no CV)",Image Recognition,,,,0.50000,0.50000,,,,,,,,,,,
+58,59,,,,,,,,50:200,,,,Deep Neural Net,,,yes,36,yes,>=1,,convex (Larochelle2007),,,,"k = 1
+(no CV)",Image Recognition,,,,0.33333,0.33333,,,0.33333,,,,,,,,
+59,60,,,,,,,,<10,,,,Deep Neural Net,,,yes,36,yes,>=1,,mrbi (mnist-rot-back-image) (Larochelle2007),,,,"k = 1
+(no CV)",Image Recognition,,,,0.33333,0.33333,,,0.33333,,,,,,,,
+60,61,,,,,,,,10:200,,,,Deep Neural Net,,,yes,36,yes,>=1,,mrbi (mnist-rot-back-image) (Larochelle2007),,,,"k = 1
+(no CV)",Image Recognition,,,,0.50000,0.50000,,,,,,,,,,,
+61,62,,,,,,,,,,<10,,,,,,2,no,>=1,,mnist surrogate (Klein2017),,,yes,n = 10 runs on entire dataset,Image Recognition,,,,,,,0.33333,,,,,0.33333,0.33333,,,
+62,63,,,,,,,,,,10:40,,SVM w/ RBF kernel,,,,2,no,>=1,,mnist surrogate (Klein2017),,,yes,n = 10 runs on entire dataset,Image Recognition,,,,,,,1.00000,,,,,,,,,
+63,64,,,,,,,,,,40:100,,SVM w/ RBF kernel,,,,2,no,>=1,,mnist surrogate (Klein2017),,,yes,n = 10 runs on entire dataset,Image Recognition,,,,,,,0.50000,,,,,0.50000,,,,
+64,65,,,,,,,,,,100:400,,SVM w/ RBF kernel,,,,2,no,>=1,,mnist surrogate (Klein2017),,,yes,n = 10 runs on entire dataset,Image Recognition,,,,,,,0.33333,,,,,0.33333,0.33333,,,
+65,66,,,,,,,,,,400:50000,,SVM w/ RBF kernel,,,,2,no,>=1,,mnist surrogate (Klein2017),,,yes,n = 10 runs on entire dataset,Image Recognition,,,,,,,0.25000,,0.25000,,,0.25000,0.25000,,,
+66,67,,,,,,,,,,50000:500000,,SVM w/ RBF kernel,,,,2,no,>=1,,mnist surrogate (Klein2017),,,yes,n = 10 runs on entire dataset,Image Recognition,,,,,,0.20000,0.20000,,0.20000,,,0.20000,0.20000,,,
+67,68,,,,,,,,,,>500000,,SVM w/ RBF kernel,,,,2,no,>=1,,mnist surrogate (Klein2017),,,yes,n = 10 runs on entire dataset,Image Recognition,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250,0.06250
+68,69,,,,,,,,,,<4000,,Feed Forward Neural Net,,,,6,no,>=1,,Adult (OpenML),,,yes,n = 256 runs on entire dataset,Classification,,,,,,,,,,,0.33333,0.33333,0.33333,,,
+69,70,,,,,,,,,,4000:100000,,Feed Forward Neural Net,,,,6,no,>=1,,,,,yes,n = 256 runs on entire dataset,Classification,,,,,,,,,,,,,1.00000,,,
+70,71,,,,,,,,,,<10000,,Feed Forward Neural Net,,,,6,no,>=1,,Higgs (OpenML),,,yes,n = 256 runs on entire dataset,Classification,,,,,,,,,,,0.33333,0.33333,0.33333,,,
+71,72,,,,,,,,,,10000:100000,,Feed Forward Neural Net,,,,6,no,>=1,,Higgs (OpenML),,,yes,n = 256 runs on entire dataset,Classification,,,,,,,,,,,,,1.00000,,,
+72,73,,,,,,,,,,<100,,Feed Forward Neural Net,,,,6,no,>=1,,Letter (OpenML),,,yes,n = 256 runs on entire dataset,Image Recognition,,,,,,,,,,,0.33333,0.33333,0.33333,,,
+73,74,,,,,,,,,,100:2000,,Feed Forward Neural Net,,,,6,no,>=1,,Letter (OpenML),,,yes,n = 256 runs on entire dataset,Image Recognition,,,,,,,,,,,,,1.00000,,,
+74,75,,,,,,,,,,2000:20000,,Feed Forward Neural Net,,,,6,no,>=1,,Letter (OpenML),,,yes,n = 256 runs on entire dataset,Image Recognition,,,,,,0.50000,,,,,,,0.50000,,,
+75,76,,,,,,,,,,20000:40000,,Feed Forward Neural Net,,,,6,no,>=1,,Letter (OpenML),,,yes,n = 256 runs on entire dataset,Image Recognition,,,,,0.33333,0.33333,,,,,,,0.33333,,,
+76,77,,,,,,,,,,,,Feed Forward Neural Net,,,,6,no,>=1,,MNIST (OpenML),,,yes,n = 256 runs on entire dataset,Image Recognition,,,,,,,,,,,,0.50000,0.50000,,,
+77,78,,,,,,,,,,4000:100000,,Feed Forward Neural Net,,,,6,no,>=1,,MNIST (OpenML),,,yes,n = 256 runs on entire dataset,Image Recognition,,,,,0.33333,0.33333,,,,,,,0.33333,,,
+78,79,,,,,,,,,,<1000,,Feed Forward Neural Net,,,,6,no,>=1,,Optdigits (OpenML),,,yes,n = 256 runs on entire dataset,Classification,,,,,,,,,,,0.33333,0.33333,0.33333,,,
+79,80,,,,,,,,,,1000:10000,,Feed Forward Neural Net,,,,6,no,>=1,,,,,yes,n = 256 runs on entire dataset,Classification,,,,,,,,,,,,,1.00000,,,
+80,81,,,,,,,,,,<1000,,Feed Forward Neural Net,,,,6,no,>=1,,Poker (OpenML),,,yes,n = 256 runs on entire dataset,Classification,,,,,,,,,,,0.33000,0.33000,0.33000,,,
+81,82,,,,,,,,,,1000:100000,,Feed Forward Neural Net,,,,6,no,>=1,,Poker (OpenML),,,yes,n = 256 runs on entire dataset,Classification,,,,,,,,,,,,,1.00000,,,
+82,83,,,,,,,,<100,,,,SVM w/ RBF kernel,,,,2,no,0,,16 OpenML classification datasets,,no,yes,,Classification,,,,,,1.00000,,,,,,,,,,
+83,84,,,,,,,,<40,,,,SVM w/ RBF kernel,,,,2,no,0,,16 OpenML classification datasets,,yes,yes,,Classification,,,,,,1.00000,,,,,,,,,,
+84,85,,,,,,,,40:100,,,,SVM w/ RBF kernel,,,,2,no,0,,16 OpenML classification datasets,,yes,yes,,Classification,,,,,,,,,,1.00000,,,,,,
+85,86,,,,,,,,<50,,,,2-Layer FC Net,,,,6,no,>=1,,16 OpenML classification datasets,,no,yes,,Classification,,,,,,,,,,1.00000,,,,,,
+86,87,,,,,,,,50:100,,,,2-Layer FC Net,,,,6,no,>=1,,16 OpenML classification datasets,,no,yes,,Classification,,,,,,1.00000,,,,,,,,,,
+87,88,,,,,,,,<100,,,,2-Layer FC Net,,,,6,no,>=1,,16 OpenML classification datasets,,yes,yes,,Classification,,,,,,,,,,1.00000,,,,,,
+88,89,,,,,,,,<30,,,,XGBoost,,,,8,no,>=1,,10 UCI Regression datasets,,no,yes,,Regression,,,,,,,,,,1.00000,,,,,,
+89,90,,,,,,,,30:100,,,,XGBoost,,,,8,no,>=1,,10 UCI Regression datasets,,no,yes,,Regression,,,,,,1.00000,,,,,,,,,,
+90,91,,,,,,,,<30,,,,XGBoost,,,,8,no,>=1,,10 UCI Regression datasets,,yes,yes,,Regression,,,,,,,,,,1.00000,,,,,,
+91,92,,,,,,,,30:100,,,,XGBoost,,,,8,no,>=1,,10 UCI Regression datasets,,yes,yes,,Regression,,,,,,1.00000,,,,,,,,,,

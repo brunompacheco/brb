@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import os
 
-filename = 'BeliefRuleBase.csv'
+filename = 'BeliefRuleBase_v3.csv'
 raw_filepath = os.path.join(os.curdir, filename)
 
 raw_rulebase = pd.read_csv(raw_filepath, sep=';')
@@ -88,6 +88,6 @@ for idx in range(beliefs.shape[0]):
     for col in range(beliefs.shape[1]):
         rules.iloc[idx, len(antecedents)+col] = beliefs.iloc[idx, col]
 
-rules.to_csv('rulebase.csv')
+rules.to_csv('rulebase_v3.csv')
 print('done.')
 print('really done')
