@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from typing import List, Any
 from brb.brb import csv2BRB
 from brb.attr_input import AttributeInput
+import math
 
 
 def enter_custom_input(A_i, X_i):
@@ -112,7 +113,10 @@ def custom_input(model, input):
     num_inputs = len(input[next(iter(input))])
     for i in range(num_inputs):
         for U_i in model.U:
-            attr_input[U_i] = input[U_i][i]
+            if len(input[U_i]) > 1:
+                attr_input[U_i] = input[U_i][i]
+            else:
+                attr_input[U_i] = input[U_i]
         X = AttributeInput(attr_input)
         belief_degrees = model.run(X)
         results = dict(zip(model.D, belief_degrees))
@@ -124,7 +128,7 @@ def custom_input(model, input):
         res.append(results)
         res_place.append(results_place)
 
-        # compute average belief degree over number of runs
+    # compute average belief degree over number of runs
     ave_result = {alg: 0 for alg in results.keys()}
     for result in res:
         ave_result = {alg: ave_result[alg] + bel for alg, bel in result.items()}
@@ -149,16 +153,32 @@ def custom_input(model, input):
 
     # plotting results in boxplot
     title = 'Custom input'
-    boxplot_results(boxplot_data, title)
-    boxplot_results(boxplot_data_place, title)
+    boxplot_custominputs_results(res, title)
+    #boxplot_results(boxplot_data, title)
+    #boxplot_results(boxplot_data_place, title)
 
 def boxplot_results(data: List[any], title):
     _data = [np.asarray(results) for results in data.values()]
-    _consequents = [key for key in data.keys()]
+    _consequents = [key.split('_')[1] for key in data.keys()]
 
     plt.boxplot(_data, labels=_consequents)
     plt.title(title)
     plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    plt.show()
+
+def boxplot_custominputs_results(data: List[any], title):
+    sqrt = math.ceil(np.sqrt(len(data)))
+    fig, axes = plt.subplots(sqrt, sqrt)
+
+    for idx, result in enumerate(data):
+        _data = [np.asarray(result) for result in result.values()]
+        _consequents = [key.split('_')[1] for key in result.keys()]
+
+        axes[math.floor(idx/sqrt), idx % sqrt].boxplot(_data)
+        axes[math.floor(idx/sqrt), idx % sqrt].set_xticklabels(labels=_consequents, rotation=45, ha='right')
+
+    fig.subplots_adjust(hspace=0.4)
     plt.tight_layout()
     plt.show()
 
@@ -177,7 +197,7 @@ inputs_klein = {
 # inputs BeliefRuleBase_v3
 inputs_BRB_v3 = {
     'A_UR: quality demands':
-        ['low'],
+        ['', '', '', '', ''],
     'A_UR: computational efficiency of the HPO technique':
         [''],
     'A_User\'s programming ability':
@@ -189,7 +209,7 @@ inputs_BRB_v3 = {
     'A_Time Resources':
         [''],
     'A_Number of maximum function evaluations/ trials budget':
-        [''],
+        ['100', '100', '100', '100', '100'],
     'A_Cummulative Budget':
         [''],
     'A_Wall Clock Time [s]':
@@ -197,7 +217,7 @@ inputs_BRB_v3 = {
     'A_Running time per trial [s]':
         [''],
     'A_Machine Learning Algorithm':
-        [''],
+        ['XGBoost', 'XGBoost', 'XGBoost', 'XGBoost', 'XGBoost'],
     'A_Obtainability of good approximate':
         [''],
     'A_Supports parallel evaluations':
@@ -209,7 +229,7 @@ inputs_BRB_v3 = {
     'A_Conditional HP space':
         [''],
     'A_#continuous HPs of ML alg.':
-        ['>=1'],
+        [''],
     'A_Obtainability of gradients':
         [''],
     'A_Dataset (name)':
@@ -223,7 +243,7 @@ inputs_BRB_v3 = {
     'A_Validation':
         [''],
     'A_ML task':
-        ['Regression']
+        ['Classification', 'Text', 'Image Recognition', 'Classification', 'Regression']
 }
 curdir_path = '/Users/philippnoodt/VirtualBox_VMs/Win10/Win10_SharedFolder/MA/coding/Bruno/git/brb/'
 
@@ -234,10 +254,10 @@ if __name__ == "__main__":
     print('Model created')
 
     # test with random, existing inputs
-    random_existing_input(model, 100, incomplete=0.8)
+    #random_existing_input(model, 100, incomplete=0.8)
 
     # test with custom inputs
-    #custom_input(model, inputs_BRB_v3)
+    custom_input(model, inputs_BRB_v3)
     '''
     # create random test inputs using new referential values
     print('\nindividual test inputs')
