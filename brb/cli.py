@@ -17,7 +17,8 @@ from .attr_input import AttributeInput
 @click.argument('rules', type=click.Path(exists=True))
 @click.option('--antecedent-prefix', type=click.STRING, default='A_')
 @click.option('--consequent-prefix', type=click.STRING, default='D_')
-def main(rules, antecedent_prefix, consequent_prefix):
+@click.option('--deltas-prefix', type=click.STRING, default=None)
+def main(rules, antecedent_prefix, consequent_prefix, deltas_prefix):
     """Creates a BRB model from rules defined in a csv file.
 
     The script expects the csv file to have a header, below which each row must
@@ -26,13 +27,14 @@ def main(rules, antecedent_prefix, consequent_prefix):
     identify antecedents and consequents of the model, thus it is crucial that
     they match the columns' names on the csv file.
     """
-    _main(rules, antecedent_prefix, consequent_prefix)
+    _main(rules, antecedent_prefix, consequent_prefix, deltas_prefix)
 
-def _main(rules, antecedent_prefix, consequent_prefix):
+def _main(rules, antecedent_prefix, consequent_prefix, deltas_prefix):
     model = csv2BRB(
         rules,
         antecedents_prefix=antecedent_prefix,
-        consequents_prefix=consequent_prefix
+        consequents_prefix=consequent_prefix,
+        deltas_prefix=deltas_prefix
     )
     print('Model created')
 
