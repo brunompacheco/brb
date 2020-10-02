@@ -129,20 +129,36 @@ class Rule():
                     intrsc_length = intrsc[0][1] - intrsc[0][0]
 
                     if _X_i_length == inf:
-                        # As no proper way of quantifying the match of infinite
-                        # intervals was found, we assume that if they are not
-                        # equal but have a non-empty infinite intersection, it
-                        # is a 0.5 match.
                         if _X_i == _A_i:
                             match = 1.0
                         elif intrsc_length == 0:
                             match = 0.0
                         else:
+                            # As no proper way of quantifying the match of infinite
+                            # intervals was found, we assume that if they are not
+                            # equal but have a non-empty infinite intersection, it
+                            # is a 0.5 match.
                             match = 0.5
                     else:
                         match = float(intrsc_length / _X_i_length)
                 except IndexError:  # intersection is empty
                     match = 0.0
+            elif isinstance(_A_i, set):
+                warn((
+                    'The referential value ({}) will be converted to a '
+                    'continuous interval to make the comparison with the input '
+                    '({}). This is not advised as may result in unexpected '
+                    'behavior. Please use an integer interval instead or '
+                    'convert the rule\'s referential value to continuous'
+                ).format(A_i, X_i))
+                _A_i_continuous = interval[min(_A_i), max(_A_i)]
+
+                match = Rule._get_antecedent_matching(
+                    _X_i,
+                    _A_i_continuous,
+                    X_i,
+                    A_i
+                )
         elif isinstance(_X_i, set):
             if is_numeric(_A_i):
                 # Same as the case for interval input and numeric reference.
