@@ -107,6 +107,13 @@ class Rule():
             if isinstance(_A_i, str):
                 match = float(_X_i == _A_i)
         elif isinstance(_X_i, interval):
+            _X_i_length = _X_i[0][1] - _X_i[0][0]
+            if _X_i_length == inf:
+                warn((
+                    'The use of unbounded intervals as input ({}) is not'
+                    'advised, resulting match might not follow expectations.'
+                ).format(X_i))
+
             if is_numeric(_A_i):
                 # In this case, if the input covers the referential value, we
                 # consider it a match. We do so in a binary manner because it
@@ -121,18 +128,21 @@ class Rule():
                 try:
                     intrsc_length = intrsc[0][1] - intrsc[0][0]
 
-                    _X_i_length = _X_i[0][1] - _X_i[0][0]
-
-                    if intrsc_length == inf and _X_i_length == inf:
-                        if _X_i[0][1] == inf and _A_i[0][0] <= _X_i[0][0]:
+                    if _X_i_length == inf:
+                        # As no proper way of quantifying the match of infinite
+                        # intervals was found, we assume that if they are not
+                        # equal but have a non-empty infinite intersection, it
+                        # is a 0.5 match.
+                        if _X_i == _A_i:
                             match = 1.0
-                        else:
+                        elif intrsc_length == 0:
                             match = 0.0
+                        else:
+                            match = 0.5
                     else:
                         match = float(intrsc_length / _X_i_length)
                 except IndexError:  # intersection is empty
                     match = 0.0
-
         elif isinstance(_X_i, set):
             if is_numeric(_A_i):
                 # Same as the case for interval input and numeric reference.
@@ -144,15 +154,22 @@ class Rule():
 
                 match = float(intrsc_length / _X_i_length)
             elif isinstance(_A_i, interval):
-                '''
+                # Problems might occur due to the nature of the intervals,
+                # e.g., if X_i is {1,2} and A_i is [2,3], this would result in a
+                # 0.50 match, even though the intervals share only their upper
+                # boundary.
                 warn((
                     'comparison between integer interval input `{}` and '
-                    'continuous interval `{}` not supported.'
+                    'continuous interval `{}` is not advised, results might '
+                    'not match the expectations.'
                 ).format(X_i, A_i))
-                '''
-                _X_i = list(_X_i)
-                if _A_i[0][0] <= _X_i[0] and _A_i[0][1] >= _X_i[-1]:
-                    match = 1.0
+
+                intrsc_length = sum([
+                    _X_i_element in _A_i for _X_i_element in _X_i
+                ])
+                _X_i_length = len(_X_i)
+
+                match = float(intrsc_length / _X_i_length)
         elif isinstance(_X_i, dict):
             if isinstance(_A_i, str) or is_numeric(_A_i):
                 match = float(_X_i[_A_i])
@@ -167,9 +184,9 @@ class Rule():
             warn('Input {} mismatches the referential value {}'.format(
                 X_i, A_i
             ))
-        if np.isnan(match):
-            print('nan just created')
-            print('why does he stop here')
+
+        assert isinstance(match, float)
+
         return match
 
     def get_matching_degree(self, X: AttributeInput) -> float:
@@ -185,11 +202,7 @@ class Rule():
             U_i: self.get_antecedent_matching(U_i, X)
             for U_i in self.A_values.keys()
         }
-        try:
-            if np.isnan(np.sum([val for val in alphas_i.values()])):
-                print('alphas_i contains nans')
-        except:
-            print('couldn\'t go into try')
+
         if self.matching_degree == 'geometric':
             return self._geometric_matching_degree(self.delta, alphas_i)
         elif self.matching_degree == 'arithmetic':
