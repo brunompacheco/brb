@@ -105,7 +105,13 @@ class Rule():
                 match = float(_X_i in _A_i)
         elif isinstance(_X_i, str):
             if isinstance(_A_i, str):
-                match = float(_X_i == _A_i)
+                _A_i = set(_A_i.split(':'))
+                _X_i = set(_X_i.split(':'))
+                intrsc_length = len(_X_i & _A_i)
+                _X_i_length = len(_X_i)
+
+                match = float(intrsc_length / _X_i_length)
+
         elif isinstance(_X_i, interval):
             _X_i_length = _X_i[0][1] - _X_i[0][0]
             if _X_i_length == inf:
@@ -197,9 +203,11 @@ class Rule():
             elif isinstance(_A_i, dict):
                 raise NotImplementedError('Uncertain rules are not supported')
         else:
+            '''
             warn('Input {} mismatches the referential value {}'.format(
                 X_i, A_i
             ))
+            '''
 
         assert isinstance(match, float)
 
