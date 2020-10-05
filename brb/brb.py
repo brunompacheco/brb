@@ -172,6 +172,9 @@ class RuleBaseModel():
 
             # transforms referential value to rule shape
             rule_beta = np.asarray(beta_k)[0]
+            delta_array = np.asarray(delta)[0]
+            delta = {U_i: delta_value for U_i, delta_value
+                        in zip(self.U, delta_array)}
 
             self.add_rule(Rule(A_values=A_values, beta=rule_beta, delta=delta,
                                theta=theta))
@@ -332,7 +335,7 @@ def csv2BRB(
         csv_filepath: str,
         antecedents_prefix: str,
         consequents_prefix: str,
-        deltas_prefix: str = None,
+        deltas_prefix: str,
         thetas: str = None,
     ) -> RuleBaseModel:
     """Converts csv table to a belief rule base (RuleBaseModel).
