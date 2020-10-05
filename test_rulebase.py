@@ -197,60 +197,61 @@ inputs_klein = {
 # inputs BeliefRuleBase_v3
 inputs_BRB_v3 = {
     'A_UR: quality demands':
-        ['', '', '', '', ''],
+        ['', '', '', ''],
     'A_UR: computational efficiency of the HPO technique':
-        [''],
+        ['', '', '', ''],
     'A_User\'s programming ability':
-        [''],
+        ['low', 'medium', 'high', ''],
     'A_Access to parallel computing':
-        [''],
+        ['yes', 'yes', 'yes', 'yes'],
     'A_Production use case':
-        [''],
+        ['', '', '', ''],
     'A_Time Resources':
-        [''],
+        ['', '', '', ''],
     'A_Number of maximum function evaluations/ trials budget':
-        ['100', '100', '100', '100', '100'],
+        ['', '', '', ''],
     'A_Cummulative Budget':
-        [''],
+        ['', '', '', ''],
     'A_Wall Clock Time [s]':
-        [''],
+        ['', '', '', ''],
     'A_Running time per trial [s]':
-        [''],
+        ['', '', '', ''],
     'A_Machine Learning Algorithm':
-        ['XGBoost', 'XGBoost', 'XGBoost', 'XGBoost', 'XGBoost'],
+        ['', '', '', ''],
     'A_Obtainability of good approximate':
-        [''],
+        ['', '', '', ''],
     'A_Supports parallel evaluations':
-        [''],
+        ['', '', '', ''],
     'A_Usage of one-hot encoding for cat. features':
-        [''],
+        ['', '', '', ''],
     'A_Dimensionality of HPs':
-        [''],
+        ['', '', '', ''],
     'A_Conditional HP space':
-        [''],
+        ['', '', '', ''],
     'A_#continuous HPs of ML alg.':
-        [''],
+        ['', '', '', ''],
     'A_Obtainability of gradients':
-        [''],
+        ['', '', '', ''],
     'A_Dataset (name)':
-        [''],
+        ['', '', '', ''],
     'A_Number of instances in dataset':
-        [''],
+        ['', '', '', ''],
     'A_Artificial noise in dataset':
-        [''],
+        ['', '', '', ''],
     'A_Surrogate benchmarking':
-        [''],
+        ['', '', '', ''],
     'A_Validation':
-        [''],
+        ['', '', '', ''],
     'A_ML task':
-        ['Classification', 'Text', 'Image Recognition', 'Classification', 'Regression']
+        ['', '', '', ''],
 }
 curdir_path = '/Users/philippnoodt/VirtualBox_VMs/Win10/Win10_SharedFolder/MA/coding/Bruno/git/brb/'
 
 if __name__ == "__main__":
 
     # create model from rules.csv
-    model = csv2BRB('rulebase_v3.csv', antecedents_prefix='A_', consequents_prefix='D_')
+    model = csv2BRB('hpo_rulebase_v5.csv', antecedents_prefix='A_', consequents_prefix='D_',
+                    deltas_prefix='delta_')
     print('Model created')
 
     # test with random, existing inputs
