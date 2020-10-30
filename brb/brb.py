@@ -27,6 +27,7 @@ approach.
     >>> model.run(X)
     [0.15517241379310348, 0.8448275862068964]
 """
+from copy import copy
 from typing import List, Any
 
 import numpy as np
@@ -181,6 +182,36 @@ class RuleBaseModel():
     # defining the full set of rules.
 
     # TODO: add interface for "tunable" parameters
+
+    def expand_rules(self, A: dict) -> List[Rule]:
+        """Expands rules with empty antecedents to cover all possibilities.
+
+        Args:
+            A: Dictinary indexed by `self.U` that contains all possible
+            referential values for the antecedents.
+
+        Returns:
+            complete_rules: All rules, containing the original and the new ones.
+        """
+        # referential values must be provided for all antecedents
+        assert set(self.U) == set(A.keys())
+
+        # no previous antecedent => all rules are complete
+        complete_rules = self.rules
+        for U_i in self.U:
+            # for the current antecedent, we don't know which rules are complete
+            _rules = complete_rules
+            complete_rules = list()
+
+            for rule in _rules:
+                if U_i not in rule.A_values.keys():
+                    A_i = A[U_i]
+
+                    complete_rules += rule.expand_antecedent(U_i, A_i)
+                else:
+                    complete_rules.append(copy(rule))
+
+        return complete_rules
 
     def run(self, X: AttributeInput):
         """Infer the output based on the RIMER approach.

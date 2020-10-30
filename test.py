@@ -61,15 +61,6 @@ if __name__ == "__main__":
     assert res['success'] == True
     assert res['fun'] >= 0
 
-    def obj_function(A, rule):
-        X = AttributeInput({
-            'Antecedent': {
-                'good': A[0],
-                'bad': A[1]
-            }
-        })
-        return - rule.get_matching_degree(X)
-
     res = minimize(obj_function, [1,1], args=good_rule, bounds=[(0,1), (0,1)])
     assert res['success']
     assert - res['fun'] <= 1
@@ -363,5 +354,46 @@ if __name__ == "__main__":
     assert X.get_completeness(['A_1', 'A_3']) == 1.0
     assert X.get_completeness(['A_2']) == 0.5
     assert X.get_completeness(['A_2', 'A_3']) == 0.75
+
+    # rule creation
+    rules_filepath = os.path.join(os.curdir, 'test_rules3.csv')
+    df_rules = pd.read_csv(rules_filepath, index_col='rule_id')
+
+    df_cols = df_rules.columns
+
+    U = [col for col in df_cols if col[:2] == 'A_']
+    D = [col for col in df_cols if col[:2] == 'D_']
+
+    model = RuleBaseModel(
+        U=U,
+        D=D
+    )
+
+    # gets referential values
+    A = {U_i: df_rules[U_i].dropna().unique() for U_i in U}
+
+    model.add_rules_from_df(rules_df=df_rules)
+
+    new_rules = model.expand_rules(A)
+
+    # there must be one rule for each possible combination of antecedent
+    # referential values
+    assert len(new_rules) == np.prod(list(map(len, A.values())))
+
+    new_model = RuleBaseModel(model.U, model.D)
+
+    for rule in new_rules:
+        _rule = rule
+        _rule.matching_degree = 'geometric'
+
+        new_model.add_rule(_rule)
+
+    X = AttributeInput({'A_1': 'm', 'A_2': 'm', 'A_3': {'l':0, 'm':0,'h':0}})
+
+    new_matching_degrees = [rule.get_matching_degree(X) for rule in new_model.rules]
+
+    # expanded rules' model, with geometric approach, must not have more than 1 match
+    n_matches = len([matching_degree for matching_degree in new_matching_degrees if matching_degree > 0])
+    assert n_matches <= 1
 
     print('Success!')

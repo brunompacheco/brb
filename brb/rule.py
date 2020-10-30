@@ -1,5 +1,6 @@
 """Models a belief rule and associated operations.
 """
+from copy import copy
 from typing import List, Dict, Any, Union, Callable
 from warnings import warn
 
@@ -291,3 +292,42 @@ class Rule():
         str_out += ' => ' + str(self.beta)
 
         return str_out
+
+    def expand_antecedent(self, U_i: str, A_i: list) -> list:
+        """Expands itself antecedent into multiple, complete rules.
+
+        In case `U_i` referential values are not provided in the rule
+        definition, generates copy of itself covering all the possible values
+        this antecedent can take.
+
+        Args:
+            U_i: Antecedent name to be used as a base for expansion.
+            A_i: All possible referential values for antecedent `U_i`.
+
+        Returns:
+            new_rules: List of the new rules generate as copies of `self`
+            covering all possibilities for `U_i`.
+        """
+        # the rule must be empty for the antecedent
+        assert U_i not in self.A_values.keys()
+
+        new_rules = list()
+        for A_i_j in A_i:
+            new_A_values = copy(self.A_values)
+            new_A_values[U_i] = A_i_j
+
+            new_delta = copy(self.delta)
+            # TODO: implement more robust delta calculation for new antecedent.
+            new_delta[U_i] = sum(self.delta.values()) / len(self.delta)
+
+            new_rule = Rule(
+                A_values=new_A_values,
+                beta=self.beta,
+                delta=new_delta,
+                theta=self.theta,
+                matching_degree=self.matching_degree
+            )
+
+            new_rules.append(new_rule)
+
+        return new_rules
