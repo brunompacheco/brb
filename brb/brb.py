@@ -28,7 +28,7 @@ approach.
     [0.15517241379310348, 0.8448275862068964]
 """
 from copy import copy
-from typing import List, Any, Dict, Union
+from typing import List, Any, Dict, Union, Callable
 
 from interval import interval
 import numpy as np
@@ -219,19 +219,19 @@ class RuleBaseModel():
 
     # TODO: add interface for "tunable" parameters
 
-    def expand_rules(self, A: dict) -> List[Rule]:
+    def expand_rules(
+            self,
+            matching_method: Union[str, Callable] = None
+        ) -> 'RuleBaseModel':
         """Expands rules with empty antecedents to cover all possibilities.
 
         Args:
-            A: Dictinary indexed by `self.U` that contains all possible
-            referential values for the antecedents.
+            matching_method: Changes the matching degree calculation approach
+            for the new rules. If `None`, keeps the current one.
 
         Returns:
-            complete_rules: All rules, containing the original and the new ones.
+            new_model: New model containing the original and the new rules.
         """
-        # referential values must be provided for all antecedents
-        assert set(self.U) == set(A.keys())
-
         # no previous antecedent => all rules are complete
         complete_rules = self.rules
         for U_i in self.U:
@@ -240,14 +240,21 @@ class RuleBaseModel():
             complete_rules = list()
 
             for rule in _rules:
-                if U_i not in rule.A_values.keys():
-                    A_i = A[U_i]
-
-                    complete_rules += rule.expand_antecedent(U_i, A_i)
+                if U_i.name not in rule.U_names:
+                    complete_rules += rule.expand_antecedent(
+                        U_i,
+                        matching_method
+                    )
                 else:
-                    complete_rules.append(copy(rule))
+                    new_rule = copy(rule)
+                    new_rule.matching_degree = matching_method
+                    complete_rules.append(new_rule)
 
-        return complete_rules
+        new_model = copy(self)
+
+        new_model.rules = complete_rules
+
+        return new_model
 
     def run(self, X: AttributeInput):
         """Infer the output based on the RIMER approach.

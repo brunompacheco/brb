@@ -397,31 +397,33 @@ if __name__ == "__main__":
         D=D
     )
 
-    # gets referential values
-    A = {U_i: df_rules[U_i].dropna().unique() for U_i in U}
-
     model.add_rules_from_df(rules_df=df_rules)
 
-    new_rules = model.expand_rules(A)
+    new_model = model.expand_rules(matching_method='geometric')
 
     # there must be one rule for each possible combination of antecedent
     # referential values
-    assert len(new_rules) == np.prod(list(map(len, A.values())))
+    n_combinations = 1
+    for U_i in new_model.U:
+        if isinstance(U_i, CategoricalAntecedent):
+            n_combinations *= len(U_i.referential_values)
+        else:
+            n_combinations *= 1
+    assert len(new_model.rules) == n_combinations
 
-    new_model = RuleBaseModel(model.U, model.D)
-
-    for rule in new_rules:
-        _rule = rule
-        _rule.matching_degree = 'geometric'
-
-        new_model.add_rule(_rule)
-
-    X = AttributeInput({'A_1': 'm', 'A_2': 'm', 'A_3': {'l':0, 'm':0,'h':0}})
+    X = AttributeInput({'A_1': 'm', 'A_2': 'h', 'A_3': 'h'})
 
     new_matching_degrees = [rule.get_matching_degree(X) for rule in new_model.rules]
 
-    # expanded rules' model, with geometric approach, must not have more than 1 match
+    # expanded rules' model, with geometric approach, must not have more than 1
+    # match for a completely certain input
     n_matches = len([matching_degree for matching_degree in new_matching_degrees if matching_degree > 0])
     assert n_matches <= 1
+
+    X = AttributeInput({'A_1': 'm', 'A_2': 'm', 'A_3': {'l':1/3, 'm':1/3,'h':1/3}})
+    new_matching_degrees = [rule.get_matching_degree(X) for rule in new_model.rules]
+
+    # the sum of the matching degrees must always be one for the new model
+    assert np.isclose(sum(new_matching_degrees), 1.0)
 
     print('Success!')

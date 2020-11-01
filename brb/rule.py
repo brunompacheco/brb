@@ -5,7 +5,9 @@ from typing import List, Dict, Any, Union, Callable
 
 import numpy as np
 
-from .antecedent import Antecedent
+from interval import interval, inf
+
+from .antecedent import Antecedent, ContinuousAntecedent, DiscreteAntecedent, CategoricalAntecedent, infset
 from .attr_input import AttributeInput
 
 class Rule():
@@ -61,6 +63,10 @@ class Rule():
         self.beta = beta
 
         self.matching_degree = matching_degree
+
+    @property
+    def U_names(self) -> List[str]:
+        return [U_i.name for U_i in self.U]
 
     def get_matching_degree(self, X: AttributeInput) -> float:
         """Calculates the matching degree of the rule based on input `X`.
@@ -122,8 +128,7 @@ class Rule():
         """
         self._assert_input(X)
 
-        U_names = [U_i.name for U_i in self.A_values.keys()]
-        rule_input_completeness = X.get_completeness(U_names)
+        rule_input_completeness = X.get_completeness(self.U_names)
 
         norm_beta = [belief * rule_input_completeness for belief in self.beta]
 
@@ -144,7 +149,7 @@ class Rule():
         assert rule_attributes.intersection(input_attributes) == rule_attributes
 
     def __str__(self):
-        A_values_str = ["({}:{})".format(U_i, A_i)
+        A_values_str = ["({}:{})".format(U_i.name, A_i)
                         for U_i, A_i
                         in self.A_values.items()]
 
@@ -155,23 +160,36 @@ class Rule():
 
         return str_out
 
-    def expand_antecedent(self, U_i: str, A_i: list) -> list:
+    def expand_antecedent(
+            self,
+            U_i: Antecedent,
+            matching_method: Union[str, Callable] = None
+        ) -> list:
         """Expands itself antecedent into multiple, complete rules.
 
-        In case `U_i` referential values are not provided in the rule
+        In case a referential value for `U_i` is not provided in the rule
         definition, generates copy of itself covering all the possible values
         this antecedent can take.
 
         Args:
-            U_i: Antecedent name to be used as a base for expansion.
-            A_i: All possible referential values for antecedent `U_i`.
+            U_i: Antecedent to be used as a base for expansion.
+            matching_method: Changes the matching degree calculation approach
+            for the new rules. If `None`, keeps the current one.
 
         Returns:
-            new_rules: List of the new rules generate as copies of `self`
+            new_rules: List of the new rules generated as copies of `self`
             covering all possibilities for `U_i`.
         """
         # the rule must be empty for the antecedent
-        assert U_i not in self.A_values.keys()
+        assert U_i.name not in self.U_names
+
+        # define referential values to be used
+        if isinstance(U_i, CategoricalAntecedent):
+            A_i = U_i.referential_values
+        elif isinstance(U_i, ContinuousAntecedent):
+            A_i = [interval[-inf, inf]]
+        elif isinstance(U_i, DiscreteAntecedent):
+            A_i = [infset()]
 
         new_rules = list()
         for A_i_j in A_i:
@@ -180,14 +198,19 @@ class Rule():
 
             new_delta = copy(self.delta)
             # TODO: implement more robust delta calculation for new antecedent.
-            new_delta[U_i] = sum(self.delta.values()) / len(self.delta)
+            new_delta[U_i.name] = sum(self.delta.values()) / len(self.delta)
+
+            if matching_method is None:
+                new_matching_degree = self.matching_degree
+            else:
+                new_matching_degree = matching_method
 
             new_rule = Rule(
                 A_values=new_A_values,
                 beta=self.beta,
                 delta=new_delta,
                 theta=self.theta,
-                matching_degree=self.matching_degree
+                matching_degree=new_matching_degree
             )
 
             new_rules.append(new_rule)
