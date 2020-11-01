@@ -263,7 +263,15 @@ class CategoricalAntecedent(Antecedent):
     Attributes:
         name: Name of the antecedent.
     """
-    _accepted_dtypes = (int, float, set)
+    _accepted_dtypes = (int, float, str)
+
+    def __init__(self, name: str, referential_values: list):
+        super().__init__(name)
+
+        for referential_value in referential_values:
+            assert self.is_ref_value(referential_value)
+
+        self.referential_values = referential_values
 
     def _match(self, X_i, A_i_k):
         match = 0.0
