@@ -6,6 +6,14 @@ from interval import interval, inf
 
 from .attr_input import AttributeInput, is_numeric
 
+class infset(set):
+    # Infinite set, containing everything.
+    def __contains__(self, item):
+        return True
+
+    def __str__(self):
+        return '{'+u'\u221E'+'}'
+
 class Antecedent(ABC):
     """An antecedent attribute for a BRB system.
 
