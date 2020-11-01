@@ -95,11 +95,11 @@ class ContinuousAntecedent(Antecedent):
                 match = float(X_i in A_i_k)
         elif isinstance(X_i, interval):
             X_i_length = X_i[0][1] - X_i[0][0]
-            # if X_i_length == inf:
-                # warn((
-                    # 'The use of unbounded intervals as input ({}) is not'
-                    # 'advised, resulting match might not follow expectations.'
-                # ).format(X_i))
+            if X_i_length == inf:
+                warn((
+                    'The use of unbounded intervals as input ({}) is not'
+                    'advised, resulting match might not follow expectations.'
+                ).format(X_i))
 
             if is_numeric(A_i_k):
                 # In this case, if the input covers the referential value, we
@@ -287,8 +287,12 @@ class CategoricalAntecedent(Antecedent):
                 # is just like the approach for calculating the match for an
                 # uncertain input.
                 match = self._match(A_i_k, X_i)
-        elif isinstance(X_i, str):
-            if isinstance(A_i_k, str):
+        elif is_numeric(X_i):
+            if is_numeric(A_i_k):
                 match = float(X_i == A_i_k)
+        elif isinstance(X_i, str):
+            match = float(X_i == A_i_k)
+        elif isinstance(X_i, dict):
+            match = float(X_i[A_i_k])
 
         return match

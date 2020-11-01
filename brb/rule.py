@@ -2,14 +2,11 @@
 """
 from copy import copy
 from typing import List, Dict, Any, Union, Callable
-from warnings import warn
 
 import numpy as np
 
-from interval import interval, inf
-
 from .antecedent import Antecedent
-from .attr_input import AttributeInput, is_numeric
+from .attr_input import AttributeInput
 
 class Rule():
     """A rule definition in a BRB system.
@@ -41,7 +38,7 @@ class Rule():
             theta: float = 1,
             matching_degree: Union[str, Callable] = 'arithmetic'
         ):
-        self.U = A_values.keys()
+        self.U = list(A_values.keys())
 
         self.A_values = A_values
         for U_i in self.U:
@@ -52,12 +49,12 @@ class Rule():
             self.A_values[U_i] = A_i_k
 
         if delta is None:
-            self.delta = {attr: 1 for attr in A_values.keys()}
+            self.delta = {U_i.name: 1 for U_i in A_values.keys()}
         else:
             # there must exist a weight for all antecedent attributes that
             # activate the rule
             for U_i in A_values.keys():
-                assert U_i in delta.keys()
+                assert U_i.name in delta.keys()
             self.delta = delta
 
         self.theta = theta
@@ -75,7 +72,7 @@ class Rule():
         self._assert_input(X)
 
         alphas_i = {
-            U_i: U_i.match(X, self.A_values[U_i])
+            U_i.name: U_i.match(X, self.A_values[U_i])
             for U_i in self.U
         }
 
@@ -125,7 +122,8 @@ class Rule():
         """
         self._assert_input(X)
 
-        rule_input_completeness = X.get_completeness(self.A_values.keys())
+        U_names = [U_i.name for U_i in self.A_values.keys()]
+        rule_input_completeness = X.get_completeness(U_names)
 
         norm_beta = [belief * rule_input_completeness for belief in self.beta]
 

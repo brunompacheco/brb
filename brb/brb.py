@@ -28,11 +28,12 @@ approach.
     [0.15517241379310348, 0.8448275862068964]
 """
 from copy import copy
-from typing import List, Any
+from typing import List, Any, Dict, Union
 
 import numpy as np
 import pandas as pd
 
+from .antecedent import Antecedent, ContinuousAntecedent, DiscreteAntecedent, CategoricalAntecedent
 from .attr_input import AttributeInput
 from .rule import Rule
 
@@ -43,37 +44,71 @@ class RuleBaseModel():
     information and apply the operations.
 
     Attributes:
-        U: Antecendent attributes' names.
+        U: Antecendents.
         D: Consequent referential values.
         F: ?
         rules: List of rules.
     """
-    def __init__(self, U: List[str], D: List[Any], F=None):
+    def __init__(self, U: List[Antecedent], D: List[Any], F=None):
         # no repeated elements for U
-        assert len(U) == len(set(U))
+        U_names = [U_i.name for U_i in U]
+        assert len(U_names) == len(set(U_names))
+
         self.U = U
-        # TODO: add antecedents types
 
         self.D = D
         self.F = F
 
         self.rules = list()
 
-    def add_rule(self, new_rule: Rule):
+    @property
+    def U_names(self) -> List[str]:
+        return [U_i.name for U_i in self.U]
+
+    def get_antecedent_by_name(self, antecedent_name) -> Antecedent:
+        for U_i in self.U:
+            if U_i.name == antecedent_name:
+                return U_i
+
+        return None
+
+    def add_rule(
+            self,
+            A_values: Dict[str, Any],
+            beta: List[float],
+            delta: Dict[str, float] = None,
+            theta: float = 1,
+            matching_degree: Union[str, callable] = 'arithmetic'
+        ) -> Rule:
         """Adds a new rule to the model.
 
         Verifies if the given rule agrees with the model settings and adds it
         to `.rules`.
         """
         # all reference values must be related to an attribute
-        assert set(new_rule.A_values.keys()).issubset(set(self.U))
+        assert set(A_values.keys()).issubset(set(self.U_names))
 
         # TODO: handle NaN values
 
         # consequent values must agree in shape with the model's consequents
-        assert len(new_rule.beta) == len(self.D)
+        assert len(beta) == len(self.D)
+
+        _A_values = {
+            self.get_antecedent_by_name(U_i): A_value
+            for U_i, A_value in A_values.items()
+        }
+
+        new_rule = Rule(
+            A_values=_A_values,
+            beta=beta,
+            delta=delta,
+            theta=theta,
+            matching_degree=matching_degree
+        )
 
         self.rules.append(new_rule)
+
+        return new_rule
 
     def add_rules_from_df(
             self,
@@ -92,7 +127,7 @@ class RuleBaseModel():
             weights for each rule.
         """
         # TODO: add deltas input support
-        antecedents_df = rules_df[self.U]
+        antecedents_df = rules_df[self.U_names]
         consequents_df = rules_df[self.D]
 
         A_ks = np.matrix(antecedents_df.values)
@@ -169,13 +204,13 @@ class RuleBaseModel():
             A_k = np.asarray(A_k)[0]
 
             A_values = {U_i: A_k_value for U_i, A_k_value
-                        in zip(self.U, A_k) if not pd.isna(A_k_value)}
+                        in zip(self.U_names, A_k) if not pd.isna(A_k_value)}
 
             # transforms referential value to rule shape
             rule_beta = np.asarray(beta_k)[0]
 
-            self.add_rule(Rule(A_values=A_values, beta=rule_beta, delta=delta,
-                               theta=theta))
+            self.add_rule(A_values=A_values, beta=rule_beta, delta=delta,
+                               theta=theta)
 
     # TODO: add get_ function that returns the full rules matrix (all
     # combination of antecedent attributes' values) as a boilerplate for
@@ -230,7 +265,7 @@ class RuleBaseModel():
         """
         # input for all valid antecedents must be provided
         for U_i in X.attr_input.keys():
-            assert U_i in self.U
+            assert U_i in self.U_names
 
         # 2. matching degree
         # alphas[k] = \alpha_k = matching degree of k-th rule

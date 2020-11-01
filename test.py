@@ -5,26 +5,25 @@ import pandas as pd
 from scipy.optimize import minimize
 from interval import interval, inf
 
+from brb.antecedent import CategoricalAntecedent, ContinuousAntecedent, DiscreteAntecedent
 from brb.attr_input import AttributeInput, str2interval
 from brb.brb import RuleBaseModel, csv2BRB
 from brb.rule import Rule
 
 if __name__ == "__main__":
     # setup for simple tests
-    U = ['Antecedent']
+    U = [CategoricalAntecedent('Antecedent', ['good', 'bad'])]
     D = ['good', 'bad']
     model = RuleBaseModel(U=U, D=D, F=None)
 
-    good_rule = Rule(
+    good_rule = model.add_rule(
         A_values={'Antecedent':'good'},
         beta=[1, 0]  # completely good
     )
-    bad_rule = Rule(
+    bad_rule = model.add_rule(
         A_values={'Antecedent':'bad'},
         beta=[0, 1]  # completely bad
     )
-    model.add_rule(good_rule)
-    model.add_rule(bad_rule)
 
     # Arithmetic matching degree calculation
     good_rule.matching_degree = 'arithmetic'
@@ -37,11 +36,12 @@ if __name__ == "__main__":
     assert good_rule.get_matching_degree(X) == 0.0
     X = AttributeInput({
         'Antecedent': {
-            'good': 0,
+            'good': 1,
             'bad': 0
         }
     })
-    assert good_rule.get_matching_degree(X) == 0.0
+    assert U[0].match(X, 'good') == 1
+    assert good_rule.get_matching_degree(X) == 1.0
 
     # Matching degrees boundaries
     def obj_function(A, rule):
@@ -98,9 +98,10 @@ if __name__ == "__main__":
         }
     })
     assert all(
-        model.run(X_1) > model.run(X_2)
-        and model.run(X_2) > model.run(X_3)
-        and [belief_degree >= 0.0 for belief_degree in model.run(X_3)])
+            model.run(X_1) > model.run(X_2) and
+            model.run(X_2) > model.run(X_3) and
+            [belief_degree >= 0.0 for belief_degree in model.run(X_3)]
+        )
 
     # certain, complete input
     X = AttributeInput({
@@ -161,7 +162,10 @@ if __name__ == "__main__":
 
     # matrix input
     model = RuleBaseModel(
-        U=['A_1', 'A_2'],
+        U=[
+            CategoricalAntecedent('A_1', ['high', 'medium', 'low']),
+            CategoricalAntecedent('A_2', ['small', 'medium', 'large'])
+        ],
         D=['RS', 'GP']
     )
 
@@ -203,7 +207,7 @@ if __name__ == "__main__":
         _ = str2interval(true_interval)
 
     # antecedent matching degree
-    antecedents_matchings = [
+    categorical_matchings = [
         # easy referential values
         (['A', 'A'], 1.0),
         (['A', 'B'], 0.0),
@@ -211,33 +215,51 @@ if __name__ == "__main__":
         ([12, 9], 0.0),
         # uncertain input
         (['A', {'A': 0.7, 'B': 0.3}], 0.7),
-        # interval referential values
-        ([{1,2}, {1,2}], 1.0),
-        ([{1,2}, {2,3}], 0.5),
-        ([{1,2}, {3,4}], 0.0),
+    ]
+    U_i = CategoricalAntecedent('Antecedent', ['A', 'B', 12, 9])
+    for antecedents, expected_match in categorical_matchings:
+        X = AttributeInput({'Antecedent': antecedents[0]})
+        assert U_i.match(X, antecedents[1]) == expected_match
+    
+    continuous_matchings = [
+        ([12, 12], 1.0),
+        ([12, 9], 0.0),
         ([interval[1,2], interval[1,2]], 1.0),
         ([interval[1,2], interval[2,3]], 0.0),
         ([interval[1,2], interval[3,4]], 0.0),
         ([interval[1,2], interval[1.5,2.5]], 0.5),
-        ([interval[1.5,2], interval[1.5,2.5]], 0.5),
-        ([interval[1,2], interval[1.5,2.0]], 1.0),
+        ([interval[1.5,2], interval[1.5,2.5]], 1.0),
+        ([interval[1,2], interval[1.5,2.0]], 0.5),
         # infinite intervals
-        ([interval[1,inf], interval[1.5,50]], 1.0),
+        ([interval[1,inf], interval[1.5,50]], 0.5),
         ([interval[1,inf], interval[0,2]], 0.5),
+        ([interval[1.5,2], interval[1.5,inf]], 1.0),
+        ([interval[1,2], interval[1.5,inf]], 0.5),
         # mixed
-        ([{1,2}, 2], 1.0),
-        ([{1,2}, 3], 0.0),
         ([{1,2}, interval[1,2]], 1.0),
         ([{1,2}, interval[3,4]], 0.0),
         ([{1,2}, interval[1.5,2.5]], 0.5),
-        ([interval[1,2], 2], 1.0),
-        ([interval[1,2], 3], 0.0),
-        ([interval[2.5, 4.5], {1,2,3,4}], 0.5),
-        ([interval[0.5, 4.5], {1,2,3,4}], 1.0),
+    ]
+    U_i = ContinuousAntecedent('Antecedent')
+    for antecedents, expected_match in continuous_matchings:
+        X = AttributeInput({'Antecedent': antecedents[0]})
+        assert U_i.match(X, antecedents[1]) == expected_match
+
+    discrete_matchings = [
+        # interval referential values
+        ([{1,2}, {1,2}], 1.0),
+        ([{1,2}, {2,3}], 0.5),
+        ([{1,2}, {3,4}], 0.0),
+        # mixed
+        ([2, {1,2}], 1.0),
+        ([3, {1,2}], 0.0),
+        ([interval[1.5, 3.5], {1,2,3,4}], 1.0),
         ([interval[2.5, 4.5], {1,2}], 0.0),
     ]
-    for antecedents, expected_match in antecedents_matchings:
-        assert Rule._get_antecedent_matching(antecedents[1], antecedents[0]) == expected_match
+    U_i = DiscreteAntecedent('Antecedent')
+    for antecedents, expected_match in discrete_matchings:
+        X = AttributeInput({'Antecedent': antecedents[0]})
+        assert U_i.match(X, antecedents[1]) == expected_match
 
     # referential value preparation
     referential_values = [
@@ -259,12 +281,12 @@ if __name__ == "__main__":
 
     # interval-based rules
     model = RuleBaseModel(
-        U=['A_1', 'A_2'],
+        U=[DiscreteAntecedent('A_1'), ContinuousAntecedent('A_2')],
         D=['Y', 'N']
     )
 
     # numerical input, interval rule
-    rule = Rule(
+    rule = model.add_rule(
         A_values={'A_1':'1:2', 'A_2':'1.0:2.0'},
         beta=[1, 0]
     )
@@ -277,7 +299,7 @@ if __name__ == "__main__":
         assert rule.get_matching_degree(X) == expected_matching_degree
 
     # interval input, numerical rule
-    rule = Rule(
+    rule = model.add_rule(
         A_values={'A_1':'3', 'A_2':3},
         beta=[0, 1]
     )
@@ -295,28 +317,30 @@ if __name__ == "__main__":
 
     df_cols = df_rules.columns
 
-    U = [col for col in df_cols if col[:2] == 'A_']
+    U = [
+        CategoricalAntecedent('A_1', ['Yes', 'No']),
+        DiscreteAntecedent('A_2'),
+        ContinuousAntecedent('A_3')
+    ]
+    U_names = [U_i.name for U_i in U]
     D = [col for col in df_cols if col[:2] == 'D_']
 
-    model = RuleBaseModel(
-        U=U,
-        D=D
-    )
+    model = RuleBaseModel(U=U, D=D)
 
     model.add_rules_from_df(rules_df=df_rules)
 
     assert len(model.rules) == df_rules.shape[0]
 
     input_matches = [
-        (AttributeInput(dict(zip(U, ['Yes', '1:2', 1.5]))), 1.0),
-        (AttributeInput(dict(zip(U, [{'Yes':0.5, 'No':0.5}, '0:1', '0.5:1.5']))), 0.5),
+        (AttributeInput(dict(zip(U_names, ['Yes', '1:2', 1.5]))), 1.0),
+        (AttributeInput(dict(zip(U_names, [{'Yes':0.5, 'No':0.5}, '0:1', '0.5:1.5']))), 0.5),
     ]
     for X, expected_matching_degree in input_matches:
         assert model.rules[-2].get_matching_degree(X) == expected_matching_degree
 
     input_matches = [
-        (AttributeInput(dict(zip(U, ['No', '1.0:2.0', 3.5]))), 1.0),
-        (AttributeInput(dict(zip(U, [{'Yes':0.5, 'No':0.5}, '0:2.0', '2.2:4.2']))), 0.5),
+        (AttributeInput(dict(zip(U_names, ['No', '1.0:2.0', 3.5]))), 1.0),
+        (AttributeInput(dict(zip(U_names, [{'Yes':0.5, 'No':0.5}, '0:2.0', '2.2:4.2']))), 0.5),
     ]
     for X, expected_matching_degree in input_matches:
         assert model.rules[-1].get_matching_degree(X) == expected_matching_degree
