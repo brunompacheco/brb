@@ -131,12 +131,17 @@ class Rule():
 
         return norm_beta
 
+    def get_antecedents_names(self):
+        names = [U_i.name for U_i in self.U]
+
+        return names
+
     def _assert_input(self, X: AttributeInput):
         """Checks if `X` is proper.
 
         Guarantees that all the necessary attributes are present in X.
         """
-        rule_attributes = set(self.A_values.keys())
+        rule_attributes = set(self.get_antecedents_names())
         input_attributes = set(X.attr_input.keys())
         assert rule_attributes.intersection(input_attributes) == rule_attributes
 
