@@ -30,6 +30,7 @@ approach.
 from copy import copy
 from typing import List, Any, Dict, Union
 
+from interval import interval
 import numpy as np
 import pandas as pd
 
@@ -392,7 +393,32 @@ def csv2BRB(
             if match_prefix(col, deltas_prefix):
                 delta_cols.append(col)
 
-    model = RuleBaseModel(U=antecedent_cols, D=consequent_cols)
+    # define antecedents from columns
+    U = list()
+    for col in antecedent_cols:
+        col_values = df_rules[col].values
+
+        col_values = list(map(AttributeInput.prep_referential_value, col_values))
+
+        extended_col_values = list()
+        for col_value in col_values:
+            if isinstance(col_value, dict):
+                extended_col_values += list(col_value.keys())
+            else:
+                extended_col_values.append(col_value)
+
+        col_values_types = list(map(type, extended_col_values))
+
+        if str in col_values_types:
+            U_i = CategoricalAntecedent(col, list(set(extended_col_values)))
+        elif interval in col_values_types:
+            U_i = ContinuousAntecedent(col)
+        else:
+            U_i = DiscreteAntecedent(col)
+
+        U.append(U_i)
+
+    model = RuleBaseModel(U=U, D=consequent_cols)
 
     model.add_rules_from_df(df_rules, thetas=thetas, delta_cols=delta_cols)
 

@@ -385,7 +385,11 @@ if __name__ == "__main__":
 
     df_cols = df_rules.columns
 
-    U = [col for col in df_cols if col[:2] == 'A_']
+    U = [
+        CategoricalAntecedent('A_1', ['l', 'm', 'h']),
+        CategoricalAntecedent('A_2', ['l', 'm', 'h']),
+        CategoricalAntecedent('A_3', ['l', 'm', 'h'])
+    ]
     D = [col for col in df_cols if col[:2] == 'D_']
 
     model = RuleBaseModel(
