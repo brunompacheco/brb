@@ -171,6 +171,13 @@ class ContinuousAntecedent(Antecedent):
 
         return match
 
+    def __str__(self):
+        possible_ref_values = [
+            '<3.7', '2.0:3.5', '>13.2', '-50.75', '31.7'
+        ]
+
+        return str(possible_ref_values)
+
 class DiscreteAntecedent(Antecedent):
     """Implementation of an antecedent over a discrete numerical space.
 
@@ -265,6 +272,13 @@ class DiscreteAntecedent(Antecedent):
 
         return match
 
+    def __str__(self):
+        possible_ref_values = [
+            '1', '0', '5:10', '-5', '33'
+        ]
+
+        return str(possible_ref_values)
+
 class CategoricalAntecedent(Antecedent):
     """Implementation of an antecedent over a discrete numerical space.
 
@@ -304,3 +318,6 @@ class CategoricalAntecedent(Antecedent):
             match = float(X_i[A_i_k])
 
         return match
+
+    def __str__(self):
+        return str(self.referential_values)
