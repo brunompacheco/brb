@@ -403,7 +403,7 @@ def csv2BRB(
     # define antecedents from columns
     U = list()
     for col in antecedent_cols:
-        col_values = df_rules[col].values
+        col_values = df_rules[col].dropna().values
 
         col_values = list(map(AttributeInput.prep_referential_value, col_values))
 
