@@ -7,8 +7,9 @@ While setup is not ready, use it as:
 
 import click
 
-from .brb import csv2BRB
+from .antecedent import *
 from .attr_input import AttributeInput
+from .brb import csv2BRB
 
 
 @click.command()
@@ -45,7 +46,23 @@ def _main(rules, antecedent_prefix, consequent_prefix, deltas_prefix):
     for U_i in model.U:
         print('Input for {} {}:'.format(U_i.name, U_i))
 
-        attr_input[U_i.name] = input()
+        antecedent_ref_value = input()
+
+        # we understand that an input is blank for user uncertainty
+        if antecedent_ref_value == '':
+            if isinstance(U_i, CategoricalAntecedent):
+                n_ref_values = len(U_i.referential_values)
+
+                antecedent_ref_value = {
+                    ref_value: 1/n_ref_values
+                    for ref_value in U_i.referential_values
+                }
+            elif isinstance(U_i, ContinuousAntecedent):
+                antecedent_ref_value = interval[-inf,inf]
+            elif isinstance(U_i, DiscreteAntecedent):
+                antecedent_ref_value = infset()
+
+        attr_input[U_i.name] = antecedent_ref_value
 
     X = AttributeInput(attr_input)
 
