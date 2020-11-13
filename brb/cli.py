@@ -7,10 +7,9 @@ While setup is not ready, use it as:
 
 import click
 
-from interval import interval, inf
-
-from .brb import csv2BRB
+from .antecedent import *
 from .attr_input import AttributeInput
+from .brb import csv2BRB
 
 
 @click.command()
@@ -36,43 +35,34 @@ def _main(rules, antecedent_prefix, consequent_prefix, deltas_prefix):
         consequents_prefix=consequent_prefix,
         deltas_prefix=deltas_prefix
     )
+    model = model.expand_rules(matching_method='geometric')
     print('Model created')
 
     # TODO: print instructions
 
-    # get attributes possible input
-    attr_values = dict()
-    for U_i in model.U:
-        attr_values[U_i] = set()
-        for rule in model.rules:
-            if U_i in rule.A_values.keys():
-                A_i = rule.A_values[U_i]
-
-                # format string version
-                if isinstance(A_i, interval):
-                    A_i = A_i[0]  # only first component is considered, always
-                    if A_i[0] == -inf:
-                        A_i = '<{}'.format(A_i[-1])
-                    elif A_i[1] == inf:
-                        A_i = '>{}'.format(A_i[0])
-                    else:
-                        A_i = '{}:{}'.format(*A_i)
-                elif isinstance(A_i, set):
-                    A_i = '{}:{}'.format(min(A_i), max(A_i))
-                else:
-                    A_i = str(A_i)
-
-                assert isinstance(A_i, str)
-
-                attr_values[U_i].add(A_i)
-
     # get rule input
     print('\nPlease enter the antecedents values (examples between brackets)\n')
     attr_input = dict()
-    for U_i, A_i in attr_values.items():
-        print('Input for {} {}:'.format(U_i, A_i))
+    for U_i in model.U:
+        print('Input for {} {}:'.format(U_i.name, U_i))
 
-        attr_input[U_i] = input()
+        antecedent_ref_value = input()
+
+        # we understand that an input is blank for user uncertainty
+        if antecedent_ref_value == '':
+            if isinstance(U_i, CategoricalAntecedent):
+                n_ref_values = len(U_i.referential_values)
+
+                antecedent_ref_value = {
+                    ref_value: 1/n_ref_values
+                    for ref_value in U_i.referential_values
+                }
+            elif isinstance(U_i, ContinuousAntecedent):
+                antecedent_ref_value = interval[-inf,inf]
+            elif isinstance(U_i, DiscreteAntecedent):
+                antecedent_ref_value = infset()
+
+        attr_input[U_i.name] = antecedent_ref_value
 
     X = AttributeInput(attr_input)
 
@@ -89,7 +79,7 @@ def _main(rules, antecedent_prefix, consequent_prefix, deltas_prefix):
 
     print('\nResult:')
     for D_j, beta_j in zip(model.D, belief_degrees):
-        print('\t{}: {}'.format(D_j, beta_j))
+        print('\t{}: {:.2f}'.format(D_j, beta_j))
 
 if __name__ == "__main__":
     main()  # pylint: disable=no-value-for-parameter
