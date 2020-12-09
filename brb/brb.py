@@ -74,7 +74,7 @@ class RuleBaseModel():
 
         self.rules.append(new_rule)
 
-    def add_rules_from_df(
+    def  add_rules_from_df(
             self,
             rules_df: pd.DataFrame,
             thetas: str = None,
@@ -169,6 +169,10 @@ class RuleBaseModel():
 
             A_values = {U_i: A_k_value for U_i, A_k_value
                         in zip(self.U, A_k) if not pd.isna(A_k_value)}
+
+            del_k = np.asarray(delta)[0]
+            delta = {U_i: del_k_value for U_i, del_k_value
+                        in zip(self.U_names, del_k) if not pd.isna(del_k_value)}
 
             # transforms referential value to rule shape
             rule_beta = np.asarray(beta_k)[0]
@@ -331,7 +335,7 @@ def match_prefix(s: str, p: str):
 
     return s_p == p
 
-def csv2BRB(
+def  csv2BRB(
         csv_filepath: str,
         antecedents_prefix: str,
         consequents_prefix: str,

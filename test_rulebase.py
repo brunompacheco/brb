@@ -305,7 +305,7 @@ if __name__ == "__main__":
 
     # create model from rules.csv
     model = csv2BRB('csv_rulebases/hpo_rulebase_v8_spec_refvals*ant_imp--scaled.csv', antecedents_prefix='A_', consequents_prefix='D_',
-                    deltas_prefix='delta_')
+                    deltas_prefix='del_')
     print('Model created')
 
     # test with random, existing inputs
