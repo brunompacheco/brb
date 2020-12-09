@@ -245,12 +245,66 @@ inputs_BRB_v3 = {
     'A_ML task':
         ['', '', '', ''],
 }
+
+# inputs BeliefRuleBase_v8
+inputs_BRB_v8 = {
+    'A_UR: quality demands':
+        ['high', 'high', 'high', 'high'],
+    'A_User\'s programming ability':
+        ['low', 'medium', 'high', 'high'],
+    'A_Access to parallel computing':
+        ['no', 'yes', 'yes', 'yes'],
+    'A_Production use case':
+        ['', '', '', 'Predictive Quality'],
+    'A_Number of maximum function evaluations/ trials budget':
+        ['', '', '', ''],
+    'A_Running time per trial [s]':
+        ['', '', '', ''],
+    'A_Number of kernels used':
+        ['1', '8', '', ''],
+    'A_Total Computing Time [s]':
+        ['', '', '', ''],
+    'A_Machine Learning Algorithm':
+        ['', '', '', ''],
+    'A_Obtainability of good approximate':
+        ['', '', '', ''],
+    'A_Supports parallel evaluations':
+        ['', '', '', ''],
+    'A_Usage of one-hot encoding for cat. features':
+        ['', '', '', ''],
+    'A_Dimensionality of HPs':
+        ['', '', '', ''],
+    'A_Conditional HP space':
+        ['', '', '', ''],
+    'A_HP datatypes':
+        ['', '', '', ''],
+    'A_Obtainability of gradients':
+        ['', '', '', ''],
+    'A_Input Data':
+        ['', '', '', ''],
+    'A_#Instances training dataset':
+        ['', '', '', ''],
+    'A_Ratio training to test dataset':
+        ['', '', '', ''],
+    'A_Dataset balance':
+        ['', '', '', ''],
+    'A_Ratio positive to negative targets':
+        ['', '', '', ''],
+    'A_Noise in dataset':
+        ['', '', '', ''],
+    'A_Training Technique':
+        ['', '', '', ''],
+    'A_ML task':
+        ['', '', '', ''],
+    'A_Detailed ML task':
+        ['', '', '', ''],
+}
 curdir_path = '/Users/philippnoodt/VirtualBox_VMs/Win10/Win10_SharedFolder/MA/coding/Bruno/git/brb/'
 
 if __name__ == "__main__":
 
     # create model from rules.csv
-    model = csv2BRB('hpo_rulebase_v5.csv', antecedents_prefix='A_', consequents_prefix='D_',
+    model = csv2BRB('csv_rulebases/hpo_rulebase_v8_spec_refvals*ant_imp--scaled.csv', antecedents_prefix='A_', consequents_prefix='D_',
                     deltas_prefix='delta_')
     print('Model created')
 
@@ -258,7 +312,7 @@ if __name__ == "__main__":
     #random_existing_input(model, 100, incomplete=0.8)
 
     # test with custom inputs
-    custom_input(model, inputs_BRB_v3)
+    custom_input(model, inputs_BRB_v8)
     '''
     # create random test inputs using new referential values
     print('\nindividual test inputs')

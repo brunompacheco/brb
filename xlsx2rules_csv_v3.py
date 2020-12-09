@@ -11,7 +11,8 @@ from sklearn.preprocessing import StandardScaler
 delta_type = 'number of specific ref_values * antecedent importance'
 scale_deltas = True     # True, False
 
-filename = 'excel_rulebases/20201001_HPO_BeliefRuleBase_v7.csv'
+filename = 'excel_rulebases/20201001_HPO_BeliefRuleBase_v8.csv'
+version = 'v8'
 raw_filepath = os.path.join(os.curdir, filename)
 excel_rulebase = pd.read_csv(raw_filepath, sep=';', header=None)
 
@@ -23,18 +24,23 @@ def get_number_of_rules(excel_rulebase):
 
 def fill_in_antecedent_weights(rulebase, excel_rulebase, delta_type, scale_deltas,
                                num_rules, antecedents, antecedent_dict):
+
+    _ant_weight_strat = ''
     if delta_type == 'all 1':
+        _ant_weight_strat = _ant_weight_strat + 'all_1'
         for rule in range(1, num_rules + 1):
             for ant in antecedents[2:]:
                 rulebase.loc[rule, 'del_' + ant] = 1
 
     elif delta_type == 'number of total ref_values':
+        _ant_weight_strat = _ant_weight_strat + 'tot_refvals'
         for rule in range(1, num_rules + 1):
             for ant in antecedents[2:]:
                 if pd.notnull(excel_rulebase.iloc[rule+5, antecedent_dict[ant][0]]):
                     rulebase.loc[rule, 'del_' + ant] = 1/antecedent_dict[ant][1].sum()
 
     elif delta_type == 'number of specific ref_values':
+        _ant_weight_strat = _ant_weight_strat + 'spec_refvals'
         for rule in range(1, num_rules + 1):
             for ant in antecedents[2:]:
                 ref_value = excel_rulebase.iloc[rule+4, antecedent_dict[ant][0]]
@@ -43,11 +49,13 @@ def fill_in_antecedent_weights(rulebase, excel_rulebase, delta_type, scale_delta
                     rulebase.loc[rule, 'del_' + ant] = 1/antecedent_dict[ant][1].get(ref_value)
 
     elif delta_type == 'antecedent importance':
+        _ant_weight_strat = _ant_weight_strat + 'ant_importance'
         for rule in range(1, num_rules + 1):
             for ant in antecedents[2:]:
                 rulebase.loc[rule, 'del_' + ant] = 1 * float(antecedent_dict[ant][2])
 
     elif delta_type == 'number of specific ref_values * antecedent importance':
+        _ant_weight_strat = _ant_weight_strat + 'spec_refvals*ant_imp'
         for rule in range(1, num_rules + 1):
             for ant in antecedents[2:]:
                 ref_value = excel_rulebase.iloc[rule+4, antecedent_dict[ant][0]]
@@ -59,12 +67,15 @@ def fill_in_antecedent_weights(rulebase, excel_rulebase, delta_type, scale_delta
                                                        / antecedent_dict[ant][1].get(ref_value)
 
     if scale_deltas:
+        _ant_weight_strat = _ant_weight_strat + '--scaled'
         scaler = StandardScaler(with_mean=False)
         for rule in range(1, num_rules + 1):
             start, end = 'del_' + antecedents[2], 'del_' + antecedents[-1]
             deltas_rule = csv_rulebase.loc[rule, start:end].to_numpy().reshape(-1, 1)
             deltas_rule_scaled = scaler.fit_transform(deltas_rule).reshape(1, -1)
             csv_rulebase.loc[rule, start:end] = deltas_rule_scaled
+
+    return _ant_weight_strat
 
 
 if __name__ == "__main__":
@@ -127,10 +138,12 @@ if __name__ == "__main__":
         for con in consequents:
             csv_rulebase.loc[rule, 'D_' + con] = excel_rulebase.iloc[rule + 4, consequent_dict[con]]
 
-    fill_in_antecedent_weights(csv_rulebase, excel_rulebase, delta_type, scale_deltas, num_rules, antecedents, antecedent_dict)
+    ant_weight_strat = fill_in_antecedent_weights(csv_rulebase, excel_rulebase,
+                                                  delta_type, scale_deltas, num_rules,
+                                                  antecedents, antecedent_dict)
 
-
-    #csv_rulebase.to_csv('hpo_rulebase_v7.csv')
+    rulebase_name = 'hpo_rulebase_' + version + '_' + ant_weight_strat + '.csv'
+    csv_rulebase.to_csv(rulebase_name)
     print('done.')
     print('really done')
 
