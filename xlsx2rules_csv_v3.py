@@ -115,8 +115,8 @@ if __name__ == "__main__":
         counter += 1
 
     # creating the rules dataframe which will be the final .csv
-    A_list = ['A_' + ant for ant in antecedents]
-    del_list = ['del_' + ant for ant in antecedents]
+    A_list = ['A_' + ant for ant in antecedents[2:]]
+    del_list = ['del_' + ant for ant in antecedents[2:]]
     D_list = ['D_' + con for con in consequents]
     A_I_list = ['Antecedent_Importance']
     csv_rulebase = pd.DataFrame(index=range(1, 1 + num_rules),

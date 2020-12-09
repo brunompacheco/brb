@@ -207,6 +207,11 @@ class RuleBaseModel():
             A_values = {U_i: A_k_value for U_i, A_k_value
                         in zip(self.U_names, A_k) if not pd.isna(A_k_value)}
 
+            del_k = np.asarray(delta)[0]
+
+            delta = {U_i: del_k_value for U_i, del_k_value
+                        in zip(self.U_names, del_k) if not pd.isna(del_k_value)}
+
             # transforms referential value to rule shape
             rule_beta = np.asarray(beta_k)[0]
 
