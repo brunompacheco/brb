@@ -11,8 +11,8 @@ from sklearn.preprocessing import StandardScaler
 delta_type = 'number of specific ref_values * antecedent importance'
 scale_deltas = True     # True, False
 
-filename = 'excel_rulebases/20201001_HPO_BeliefRuleBase_v8..csv'
-version = 'v8.'
+filename = 'excel_rulebases/HPO_BeliefRuleBase_v9.csv'
+version = 'v9'
 raw_filepath = os.path.join(os.curdir, filename)
 excel_rulebase = pd.read_csv(raw_filepath, sep=';', header=None)
 

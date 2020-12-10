@@ -280,7 +280,7 @@ class RuleBaseModel():
         """
         # input for all valid antecedents must be provided
         for U_i in X.attr_input.keys():
-            print(U_i, self.U_names)
+
             assert U_i in self.U_names
 
         # 2. matching degree

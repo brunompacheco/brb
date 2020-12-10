@@ -45,7 +45,7 @@ class Rule():
         self.A_values = A_values
         for U_i in self.U:
             A_i_k = AttributeInput.prep_referential_value(A_values[U_i])
-            #print(A_i_k, type(A_i_k), U_i._accepted_dtypes)
+
             assert U_i.is_ref_value(A_i_k)
 
             self.A_values[U_i] = A_i_k
