@@ -52,15 +52,15 @@ def random_existing_input(model, num_runs, incomplete):
                 # enables random incomplete input
                 if incomplete == True:
                     ref_vals.append('')
-                    attr_input[U_i] = random.choice(ref_vals)
+                    attr_input[U_i.name] = random.choice(ref_vals)
                 elif isinstance(incomplete, float):
                     random_val = random.random()
                     if incomplete > random_val:
-                        attr_input[U_i] = ''
+                        attr_input[U_i.name] = ''
                     else:
-                        attr_input[U_i] = random.choice(ref_vals)
+                        attr_input[U_i.name] = random.choice(ref_vals)
                 else:
-                    attr_input[U_i] = random.choice(ref_vals)
+                    attr_input[U_i.name] = random.choice(ref_vals)
 
         # get recommendation for input
         X = AttributeInput(attr_input)
@@ -113,10 +113,10 @@ def custom_input(model, input):
     num_inputs = len(input[next(iter(input))])
     for i in range(num_inputs):
         for U_i in model.U:
-            if len(input[U_i]) > 1:
-                attr_input[U_i] = input[U_i][i]
+            if len(input[U_i.name]) > 1:
+                attr_input[U_i.name] = input[U_i.name][i]
             else:
-                attr_input[U_i] = input[U_i]
+                attr_input[U_i.name] = input[U_i.name]
         X = AttributeInput(attr_input)
         belief_degrees = model.run(X)
         results = dict(zip(model.D, belief_degrees))
@@ -304,7 +304,9 @@ curdir_path = '/Users/philippnoodt/VirtualBox_VMs/Win10/Win10_SharedFolder/MA/co
 if __name__ == "__main__":
 
     # create model from rules.csv
-    model = csv2BRB('csv_rulebases/hpo_rulebase_v8_spec_refvals*ant_imp--scaled.csv', antecedents_prefix='A_', consequents_prefix='D_',
+    model = csv2BRB('csv_rulebases/hpo_rulebase_v8._spec_refvals*ant_imp--scaled.csv',
+                    antecedents_prefix='A_',
+                    consequents_prefix='D_',
                     deltas_prefix='del_')
     print('Model created')
 

@@ -11,8 +11,8 @@ from sklearn.preprocessing import StandardScaler
 delta_type = 'number of specific ref_values * antecedent importance'
 scale_deltas = True     # True, False
 
-filename = 'excel_rulebases/20201001_HPO_BeliefRuleBase_v8.csv'
-version = 'v8'
+filename = 'excel_rulebases/20201001_HPO_BeliefRuleBase_v8..csv'
+version = 'v8.'
 raw_filepath = os.path.join(os.curdir, filename)
 excel_rulebase = pd.read_csv(raw_filepath, sep=';', header=None)
 
@@ -136,7 +136,10 @@ if __name__ == "__main__":
             csv_rulebase.loc[rule, 'A_' + ant] = excel_rulebase.iloc[rule+4, antecedent_dict[ant][0]]
             csv_rulebase.loc[rule, 'del_' + ant] = excel_rulebase.iloc[rule + 4, antecedent_dict[ant][0]+1]
         for con in consequents:
-            csv_rulebase.loc[rule, 'D_' + con] = excel_rulebase.iloc[rule + 4, consequent_dict[con]]
+            belief = excel_rulebase.iloc[rule + 4, consequent_dict[con]]
+            if isinstance(belief, str):
+                belief = belief.replace(',','.')
+            csv_rulebase.loc[rule, 'D_' + con] = belief
 
     ant_weight_strat = fill_in_antecedent_weights(csv_rulebase, excel_rulebase,
                                                   delta_type, scale_deltas, num_rules,

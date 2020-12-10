@@ -199,8 +199,9 @@ class RuleBaseModel():
 
         # convert nan values to 0
         betas = np.nan_to_num(betas)
-
+        _ruleid = 1
         for A_k, beta_k, delta, theta in zip(A_ks, betas, deltas, thetas):
+
             # converst to dict and drops nan values
             A_k = np.asarray(A_k)[0]
 
@@ -217,6 +218,7 @@ class RuleBaseModel():
 
             self.add_rule(A_values=A_values, beta=rule_beta, delta=delta,
                                theta=theta)
+            _ruleid += 1
 
     # TODO: add get_ function that returns the full rules matrix (all
     # combination of antecedent attributes' values) as a boilerplate for
@@ -278,6 +280,7 @@ class RuleBaseModel():
         """
         # input for all valid antecedents must be provided
         for U_i in X.attr_input.keys():
+            print(U_i, self.U_names)
             assert U_i in self.U_names
 
         # 2. matching degree
