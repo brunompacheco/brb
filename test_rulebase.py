@@ -300,8 +300,8 @@ inputs_BRB_v8 = {
         ['', '', '', ''],
 }
 
-# inputs BeliefRuleBase_v9
-inputs_BRB_v9 = {
+# inputs HPO BeliefRuleBase_v9
+inputs_HPO_BRB_v9 = {
     'A_UR: quality demands':
         ['', '', 'high', 'high'],
     'A_User\'s programming ability':
@@ -362,8 +362,8 @@ inputs_BRB_v9 = {
         ['', '', 'Image Recognition', ''],
 }
 
-# inputs BeliefRuleBase_v9 - Bruno's three cases
-inputs_BRB_v9_3cases = {
+# inputs HPO BeliefRuleBase_v9 - Bruno's three cases
+inputs_HPO_BRB_v9_3cases = {
     'A_UR: quality demands':
         ['', '', 'high', 'high'],
     'A_User\'s programming ability':
@@ -424,8 +424,8 @@ inputs_BRB_v9_3cases = {
         ['', '', '', ''],   #Image Recognition
 }
 
-# inputs BeliefRuleBase_v11
-inputs_BRB_v11 = {
+# inputs HPO BeliefRuleBase_v11
+inputs_HPO_BRB_v11 = {
     'A_UR: quality demands':
         ['', '', 'high', 'high'],
     'A_User\'s programming ability':
@@ -436,9 +436,9 @@ inputs_BRB_v11 = {
         ['yes', '', '', ''],
     'A_UR: Computer operating system':
         ['', '', '', ''],
-    'A_Access to parallel computing':
+    'A_Hardware: access to parallel computing':
         ['no', '', 'yes', 'yes'],
-    'A_Production use case':
+    'A_Production application area':
         ['Predictive Quality', 'Predictive Quality', 'Predictive Quality', ''],  #Predictive Quality
     'A_Number of maximum function evaluations/ trials budget':
         ['', '', '', ''],
@@ -476,6 +476,58 @@ inputs_BRB_v11 = {
         ['', '', '', ''], # yes
     'A_Training Technique':
         ['', '', '', ''], # offline
+    'A_ML task':
+        ['', '', '', ''],   # Multiclass Classification
+    'A_Detailed ML task':
+        ['', '', '', ''],   # Image Recognition
+}
+
+# inputs ML BeliefRuleBase_v5
+inputs_ML_BRB_v5 = {
+    'A_UR: quality demands':
+        ['', '', 'high', 'high'],
+    'A_User\'s programming ability':
+        ['low', 'low', 'high', ''],
+    'A_UR: need for model transparency':
+        ['yes', '', '', ''],
+    'A_UR: robustness of the model':
+        ['', '', '', ''],
+    'A_UR: scalability of the model':
+        ['', '', '', ''],
+    'A_UR: Availability of a well documented library':
+        ['yes', '', '', ''],
+    'A_UR: HPO or use of default values?':
+        ['', '', '', ''],
+    'A_UR: Computer operating system':
+        ['', '', '', ''],
+    'A_Hardware: access to parallel computing?':
+        ['no', '', 'yes', 'yes'],
+    'A_Hardware: access to high performance computing?':
+        ['no', '', 'yes', 'yes'],
+    'A_Production application area':
+        ['Predictive Quality', 'Predictive Quality', 'Predictive Quality', ''],  #Predictive Quality
+    'A_Number of maximum function evaluations/ trials budget':
+        ['', '', '', ''],
+    'A_Running time per trial [s]':
+        ['', '', '', ''],
+    'A_Number of kernels used':
+        ['', '', '', ''],
+    'A_Total Computing Time [s]':
+        ['>172800', '<7200', '>172800', '7200.0:172800'],
+    'A_Input Data':
+        ['', '', '', ''],  # Image data, Tabular data
+    'A_#Instances training dataset':
+        ['', '', '', ''],       # >1000000
+    'A_Ratio training to test dataset':
+        ['', '', '', ''],       # 2.0:9
+    'A_Feature characteristics':
+        ['', '', '', ''],   # [continuous, discrete, nominal, timestamp]
+    'A_Number of features':
+        ['', '', '', ''],      # <100
+    'A_Noise in dataset':
+        ['', '', '', ''],   # yes
+    'A_Training Technique':
+        ['', '', '', ''],   # offline
     'A_ML task':
         ['', '', '', ''],   # Multiclass Classification
     'A_Detailed ML task':
