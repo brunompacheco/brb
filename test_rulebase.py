@@ -424,22 +424,81 @@ inputs_BRB_v9_3cases = {
         ['', '', '', ''],   #Image Recognition
 }
 
+# inputs BeliefRuleBase_v11
+inputs_BRB_v11 = {
+    'A_UR: quality demands':
+        ['', '', 'high', 'high'],
+    'A_User\'s programming ability':
+        ['low', 'low', 'high', ''],
+    'A_UR: need for model transparency':
+        ['yes', '', '', ''],
+    'A_UR: Availability of a well documented library':
+        ['yes', '', '', ''],
+    'A_UR: Computer operating system':
+        ['', '', '', ''],
+    'A_Access to parallel computing':
+        ['no', '', 'yes', 'yes'],
+    'A_Production use case':
+        ['Predictive Quality', 'Predictive Quality', 'Predictive Quality', ''],  #Predictive Quality
+    'A_Number of maximum function evaluations/ trials budget':
+        ['', '', '', ''],
+    'A_Running time per trial [s]':
+        ['', '', '', ''],
+    'A_Number of kernels used':
+        ['', '', '', ''],
+    'A_Total Computing Time [s]':
+        ['>172800', '<7200', '>172800', '7200.0:172800'],
+    'A_Machine Learning Algorithm':
+        ['XGBoost', 'XGBoost', 'XGBoost', ''],
+    'A_Obtainability of good approximate':
+        ['', '', '', ''],
+    'A_Supports parallel evaluations':
+        ['', '', '', ''],
+    'A_Usage of one-hot encoding for cat. features':
+        ['', '', '', ''],
+    'A_Dimensionality of HPs':
+        ['', '', '', ''],
+    'A_Conditional HP space':
+        ['', '', '', 'yes'],
+    'A_HP datatypes':
+        ['', '', '', ''],
+    'A_Availability of a warm-start HP configuration':
+        ['', '', '', ''],
+    'A_Obtainability of gradients':
+        ['', '', '', ''],
+    'A_Input Data':
+        ['', '', '', ''],  # Image data
+    'A_#Instances training dataset':
+        ['', '', '', ''],
+    'A_Ratio training to test dataset':
+        ['', '', '', ''],
+    'A_Noise in dataset':
+        ['', '', '', ''], # yes
+    'A_Training Technique':
+        ['', '', '', ''], # offline
+    'A_ML task':
+        ['', '', '', ''],   # Multiclass Classification
+    'A_Detailed ML task':
+        ['', '', '', ''],   # Image Recognition
+}
+
 curdir_path = '/Users/philippnoodt/VirtualBox_VMs/Win10/Win10_SharedFolder/MA/coding/Bruno/git/brb/'
 
 if __name__ == "__main__":
 
     # create model from rules.csv
-    model = csv2BRB('csv_rulebases/hpo_rulebase_v9_spec_refvals*ant_imp--scaled.csv',
+    model = csv2BRB('csv_rulebases/csv_ML_BeliefRuleBase_v5.csv_spec_refvals*ant_imp--scaled.csv',
+                    #'csv_rulebases/csv_HPO_BeliefRuleBase_v11.csv_spec_refvals*ant_imp--scaled.csv'
                     antecedents_prefix='A_',
                     consequents_prefix='D_',
                     deltas_prefix='del_')
     print('Model created')
 
     # test with random, existing inputs
-    #random_existing_input(model, 100, incomplete=0.2)
+    random_existing_input(model, 100, incomplete=0.6)
 
     # test with custom inputs
-    custom_input(model, inputs_BRB_v9)
+    #custom_input(model, inputs_BRB_v11)
     '''
     # create random test inputs using new referential values
     print('\nindividual test inputs')

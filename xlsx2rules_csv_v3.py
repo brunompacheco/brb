@@ -11,9 +11,8 @@ from sklearn.preprocessing import StandardScaler
 delta_type = 'number of specific ref_values * antecedent importance'
 scale_deltas = True     # True, False
 
-filename = 'excel_rulebases/HPO_BeliefRuleBase_v9.csv'
-version = 'v9'
-raw_filepath = os.path.join(os.curdir, filename)
+filename = 'ML_BeliefRuleBase_v5.csv'  #excel_rulebases/
+raw_filepath = os.path.join(os.curdir, 'excel_rulebases/' + filename)
 excel_rulebase = pd.read_csv(raw_filepath, sep=';', header=None)
 
 def get_number_of_rules(excel_rulebase):
@@ -145,7 +144,7 @@ if __name__ == "__main__":
                                                   delta_type, scale_deltas, num_rules,
                                                   antecedents, antecedent_dict)
 
-    rulebase_name = 'hpo_rulebase_' + version + '_' + ant_weight_strat + '.csv'
+    rulebase_name = 'csv_' + filename + '_' + ant_weight_strat + '.csv'
     csv_rulebase.to_csv(rulebase_name)
     print('done.')
     print('really done')
