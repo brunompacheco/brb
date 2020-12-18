@@ -11,7 +11,7 @@ from sklearn.preprocessing import StandardScaler
 delta_type = 'ref_values * antecedent importance'    # 'all 1', 'ref_values * antecedent importance'
 scale_deltas = '1 mean'     # "1 mean", "unit variance", 'nope'
 
-filename = 'HPO_BeliefRuleBase_wKO_v12.csv'  #excel_rulebases/
+filename = 'HPO_BeliefRuleBase_wKO_v13.csv'  #excel_rulebases/
 raw_filepath = os.path.join(os.curdir, 'excel_rulebases/' + filename)
 excel_rulebase = pd.read_csv(raw_filepath, sep=';', header=None)
 
@@ -124,16 +124,21 @@ if __name__ == "__main__":
         counter += 1
 
     # creating the rules dataframe which will be the final .csv
+    thetas = ['thetas']
     A_list = ['A_' + ant for ant in antecedents[2:]]
     del_list = ['del_' + ant for ant in antecedents[2:]]
     D_list = ['D_' + con for con in consequents]
     A_I_list = ['Antecedent_Importance']
     csv_rulebase = pd.DataFrame(index=range(1, 1 + num_rules),
-                                columns=(A_list + D_list + del_list + A_I_list))
+                                columns=(thetas + A_list + D_list + del_list + A_I_list))
 
     # filling the ruleid column
     for num in range(num_rules):
         csv_rulebase.iloc[num, 0] = num + 1
+
+    # adding the rule weights: thetas
+    for rule in range(1, num_rules+1):
+        csv_rulebase.loc[rule, 'thetas'] = excel_rulebase.iloc[rule+4, 1]
 
     # adding the antecedent importances
     for idx, (ant, info) in enumerate(antecedent_dict.items()):

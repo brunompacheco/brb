@@ -194,6 +194,12 @@ def boxplot_custominputs_results(data: List[any], title, y, rec, show_top):
     sqrt = math.ceil(np.sqrt(len(data)))
     fig, axes = plt.subplots(sqrt, sqrt)
 
+    title_list = ['IF {(Transparency; yes)}',
+                  'IF {(Transparency; must)}',
+                  'IF {(Well-documented implementation; must)}',
+                  'IF {(Conditionality; yes)}'
+                  ]
+
     for idx, result in enumerate(data):
         _dict = {y: [], rec: []}
         '''
@@ -223,11 +229,19 @@ def boxplot_custominputs_results(data: List[any], title, y, rec, show_top):
             _consequents = _consequents[:show_top]
         #axes[math.floor(idx/sqrt), idx % sqrt].boxplot(_data)
         #axes[math.floor(idx/sqrt), idx % sqrt].set_xticklabels(labels=_consequents, rotation=45, ha='right')
-        sns.boxplot(ax=axes[math.floor(idx / sqrt), idx % sqrt], x=rec, y=y, data=_df, palette='IPTgreencmap')
+        sns.boxplot(ax=axes[math.floor(idx / sqrt), idx % sqrt], x=rec, y=y, data=_df,
+                    palette='IPTgreencmap')
+        y_title_margin = 1.2
+        sns.set_theme(font="Arial", font_scale=6)
+        axes[math.floor(idx/sqrt), idx % sqrt].set_title(title_list[idx], fontsize=9) #, y=y_title_margin
         axes[math.floor(idx/sqrt), idx % sqrt].set_xticklabels(labels=_consequents, rotation=45,
-                                                               ha='right', fontsize=8)
+                                                               ha='right', fontsize=7) #
+        #axes[math.floor(idx / sqrt), idx % sqrt].set_yticklabels(plt.yticks(), fontsize=7)
+        axes[math.floor(idx / sqrt), idx % sqrt].set_xlabel('')
+        axes[math.floor(idx / sqrt), idx % sqrt].set_ylabel('Total belief', fontsize=9)
+        #sns.set_context("paper", rc={"font.size": 7, "axes.titlesize": 9, "axes.labelsize": 7})
 
-    fig.subplots_adjust(hspace=0.4)
+    fig.subplots_adjust(top=0.95, bottom=0.16, left=0.12, right=0.95, hspace=0.72, wspace=0.4)
     plt.tight_layout()
     plt.show()
 
@@ -242,174 +256,6 @@ inputs_klein = {
           "Artificial noise in dataset": ['no', 'no', 'no', 'yes'],
           "Surrogate Benchmarking": ['yes', 'yes', 'yes', 'yes'],
           "Task that was performed by the ML algorithm who's HPs were optimized": ['Regression', 'Classification', 'Classification', 'Classification']}
-
-# inputs BeliefRuleBase_v3
-inputs_BRB_v3 = {
-    'A_UR: quality demands':
-        ['', '', '', ''],
-    'A_UR: computational efficiency of the HPO technique':
-        ['', '', '', ''],
-    'A_User\'s programming ability':
-        ['low', 'medium', 'high', ''],
-    'A_Access to parallel computing':
-        ['yes', 'yes', 'yes', 'yes'],
-    'A_Production use case':
-        ['', '', '', ''],
-    'A_Time Resources':
-        ['', '', '', ''],
-    'A_Number of maximum function evaluations/ trials budget':
-        ['', '', '', ''],
-    'A_Cummulative Budget':
-        ['', '', '', ''],
-    'A_Wall Clock Time [s]':
-        ['', '', '', ''],
-    'A_Running time per trial [s]':
-        ['', '', '', ''],
-    'A_Machine Learning Algorithm':
-        ['', '', '', ''],
-    'A_Obtainability of good approximate':
-        ['', '', '', ''],
-    'A_Supports parallel evaluations':
-        ['', '', '', ''],
-    'A_Usage of one-hot encoding for cat. features':
-        ['', '', '', ''],
-    'A_Dimensionality of HPs':
-        ['', '', '', ''],
-    'A_Conditional HP space':
-        ['', '', '', ''],
-    'A_#continuous HPs of ML alg.':
-        ['', '', '', ''],
-    'A_Obtainability of gradients':
-        ['', '', '', ''],
-    'A_Dataset (name)':
-        ['', '', '', ''],
-    'A_Number of instances in dataset':
-        ['', '', '', ''],
-    'A_Artificial noise in dataset':
-        ['', '', '', ''],
-    'A_Surrogate benchmarking':
-        ['', '', '', ''],
-    'A_Validation':
-        ['', '', '', ''],
-    'A_ML task':
-        ['', '', '', ''],
-}
-
-# inputs BeliefRuleBase_v8
-inputs_BRB_v8 = {
-    'A_UR: quality demands':
-        ['high', 'high', 'high', 'high'],
-    'A_User\'s programming ability':
-        ['low', 'medium', 'high', 'high'],
-    'A_Access to parallel computing':
-        ['no', 'yes', 'yes', 'yes'],
-    'A_Production use case':
-        ['', '', '', 'Predictive Quality'],
-    'A_Number of maximum function evaluations/ trials budget':
-        ['', '', '', ''],
-    'A_Running time per trial [s]':
-        ['', '', '', ''],
-    'A_Number of kernels used':
-        ['1', '8', '', ''],
-    'A_Total Computing Time [s]':
-        ['', '', '', ''],
-    'A_Machine Learning Algorithm':
-        ['', '', '', ''],
-    'A_Obtainability of good approximate':
-        ['', '', '', ''],
-    'A_Supports parallel evaluations':
-        ['', '', '', ''],
-    'A_Usage of one-hot encoding for cat. features':
-        ['', '', '', ''],
-    'A_Dimensionality of HPs':
-        ['', '', '', ''],
-    'A_Conditional HP space':
-        ['', '', '', ''],
-    'A_HP datatypes':
-        ['', '', '', ''],
-    'A_Obtainability of gradients':
-        ['', '', '', ''],
-    'A_Input Data':
-        ['', '', '', ''],
-    'A_#Instances training dataset':
-        ['', '', '', ''],
-    'A_Ratio training to test dataset':
-        ['', '', '', ''],
-    'A_Dataset balance':
-        ['', '', '', ''],
-    'A_Ratio positive to negative targets':
-        ['', '', '', ''],
-    'A_Noise in dataset':
-        ['', '', '', ''],
-    'A_Training Technique':
-        ['', '', '', ''],
-    'A_ML task':
-        ['', '', '', ''],
-    'A_Detailed ML task':
-        ['', '', '', ''],
-}
-
-# inputs HPO BeliefRuleBase_v9
-inputs_HPO_BRB_v9 = {
-    'A_UR: quality demands':
-        ['', '', 'high', 'high'],
-    'A_User\'s programming ability':
-        ['low', 'low', 'high', ''],
-    'A_UR: need for model transparency':
-        ['yes', '', '', 'yes'],
-    'A_UR: Availability of a well documented library':
-        ['yes', '', '', ''],
-    'A_UR: Computer operating system':
-        ['', '', '', ''],
-    'A_Access to parallel computing':
-        ['no', '', 'yes', 'yes'],
-    'A_Production use case':
-        ['Predictive Quality', '', 'Predictive Quality', ''],  #Predictive Quality
-    'A_Number of maximum function evaluations/ trials budget':
-        ['', '', '', ''],
-    'A_Running time per trial [s]':
-        ['', '', '', ''],
-    'A_Number of kernels used':
-        ['', '', '', ''],
-    'A_Total Computing Time [s]':
-        ['>172800', '<7200', '>172800', ''],
-    'A_Machine Learning Algorithm':
-        ['Random Forest', '', '', ''],
-    'A_Obtainability of good approximate':
-        ['', '', '', ''],
-    'A_Supports parallel evaluations':
-        ['yes', '', '', ''],
-    'A_Usage of one-hot encoding for cat. features':
-        ['', '', '', ''],
-    'A_Dimensionality of HPs':
-        ['6', '', '', ''],
-    'A_Conditional HP space':
-        ['yes', '', '', ''],
-    'A_HP datatypes':
-        ['', '', '', ''],
-    'A_Availability of a warm-start HP configuration':
-        ['', '', '', ''],
-    'A_Obtainability of gradients':
-        ['', '', '', ''],
-    'A_Input Data':
-        ['', '', 'Image data', ''],
-    'A_#Instances training dataset':
-        ['', '', '', ''],
-    'A_Ratio training to test dataset':
-        ['', '', '', ''],
-    'A_Dataset balance':
-        ['imbalanced', '', '', ''],
-    'A_Ratio positive to negative targets':
-        ['', '', '', ''],
-    'A_Noise in dataset':
-        ['yes', '', '', ''],
-    'A_Training Technique':
-        ['offline', '', '', ''],
-    'A_ML task':
-        ['', '', 'Multiclass Classification', ''],
-    'A_Detailed ML task':
-        ['', '', 'Image Recognition', ''],
-}
 
 # inputs HPO BeliefRuleBase_v9 - Bruno's three cases
 inputs_HPO_BRB_v9_3cases = {
@@ -473,37 +319,33 @@ inputs_HPO_BRB_v9_3cases = {
         ['', '', '', ''],   #Image Recognition
 }
 
-# inputs HPO BeliefRuleBase_v11
-inputs_HPO_BRB_v11 = {
+# inputs HPO BeliefRuleBase_v13 - KNOCK-OUT RULES TESTING 1
+inputs_HPO_BRB_KO1_v13 = {
     'A_UR: quality demands':
-        ['', '', 'high', 'high'],
+        ['', '', '', ''],
     'A_User\'s programming ability':
-        ['low', 'low', 'high', ''],
+        ['', '', '', ''],
     'A_UR: need for model transparency':
-        ['yes', '', '', ''],
+        ['yes', 'must', '', ''],
     'A_UR: Availability of a well documented library':
-        ['yes', '', '', ''],
+        ['', '', 'must', ''],
     'A_UR: Computer operating system':
         ['', '', '', ''],
-    'A_Hardware: access to parallel computing':
-        ['no', '', 'yes', 'yes'],
+    'A_Hardware: Number of workers/kernels for parallel computing':
+        ['', '', '', ''],
     'A_Production application area':
-        ['Predictive Quality', 'Predictive Quality', 'Predictive Quality', ''],  #Predictive Quality
+        ['', '', '', ''],  # 'Predictive Quality'
     'A_Number of maximum function evaluations/ trials budget':
         ['', '', '', ''],
     'A_Running time per trial [s]':
         ['', '', '', ''],
-    'A_Number of kernels used':
-        ['', '', '', ''],
     'A_Total Computing Time [s]':
-        ['>172800', '<7200', '>172800', '7200.0:172800'],
+        ['', '', '', ''],  # >172800, '7200.0:172800'
     'A_Machine Learning Algorithm':
-        ['XGBoost', 'XGBoost', 'XGBoost', ''],
+        ['', '', '', ''],
     'A_Obtainability of good approximate':
         ['', '', '', ''],
     'A_Supports parallel evaluations':
-        ['', '', '', ''],
-    'A_Usage of one-hot encoding for cat. features':
         ['', '', '', ''],
     'A_Dimensionality of HPs':
         ['', '', '', ''],
@@ -522,122 +364,183 @@ inputs_HPO_BRB_v11 = {
     'A_Ratio training to test dataset':
         ['', '', '', ''],
     'A_Noise in dataset':
-        ['', '', '', ''], # yes
+        ['', '', '', ''],   # yes
     'A_Training Technique':
-        ['', '', '', ''], # offline
+        ['', '', '', ''],   # offline
+    'A_ML task':
+        ['', '', '', ''],   # Multiclass Classification
+    'A_Detailed ML task':
+        ['', '', '', ''],   # Image Recognition
+}
+# inputs HPO BeliefRuleBase_v13 - KNOCK-OUT RULES TESTING 2
+inputs_HPO_BRB_KO2_v13 = {
+    'A_UR: quality demands':
+        ['high', 'high', 'high', 'high'],
+    'A_User\'s programming ability':
+        ['', '', '', ''],
+    'A_UR: need for model transparency':
+        ['yes', 'must', '', ''],
+    'A_UR: Availability of a well documented library':
+        ['', '', 'must', ''],
+    'A_UR: Computer operating system':
+        ['', '', '', ''],
+    'A_Hardware: Number of workers/kernels for parallel computing':
+        ['', '', '', ''],
+    'A_Production application area':
+        ['', '', '', ''],  # 'Predictive Quality'
+    'A_Number of maximum function evaluations/ trials budget':
+        ['', '', '', ''],
+    'A_Running time per trial [s]':
+        ['', '', '', ''],
+    'A_Total Computing Time [s]':
+        ['7200.0:172800', '7200.0:172800', '7200.0:172800', '7200.0:172800'],  # >172800, '7200.0:172800'
+    'A_Machine Learning Algorithm':
+        ['XGBoost', 'XGBoost', 'XGBoost', 'XGBoost'],
+    'A_Obtainability of good approximate':
+        ['', '', '', ''],
+    'A_Supports parallel evaluations':
+        ['', '', '', ''],
+    'A_Dimensionality of HPs':
+        ['', '', '', ''],
+    'A_Conditional HP space':
+        ['', '', '', 'yes'],
+    'A_HP datatypes':
+        ['', '', '', ''],
+    'A_Availability of a warm-start HP configuration':
+        ['', '', '', ''],
+    'A_Obtainability of gradients':
+        ['', '', '', ''],
+    'A_Input Data':
+        ['', '', '', ''],  # Image data
+    'A_#Instances training dataset':
+        ['', '', '', ''],
+    'A_Ratio training to test dataset':
+        ['', '', '', ''],
+    'A_Noise in dataset':
+        ['', '', '', ''],   # yes
+    'A_Training Technique':
+        ['Offline', 'Offline', 'Offline', 'Offline'],   # Offline
+    'A_ML task':
+        ['Multiclass Classification', 'Multiclass Classification', 'Multiclass Classification', 'Multiclass Classification'],   # Multiclass Classification
+    'A_Detailed ML task':
+        ['', '', '', ''],   # Image Recognition
+}
+
+# inputs HPO BeliefRuleBase_v13 - TRANSPARENCY TESTING
+inputs_HPO_BRB_v13 = {
+    'A_UR: quality demands':
+        ['', 'high', 'high', 'high'],
+    'A_User\'s programming ability':
+        ['', '', '', ''],
+    'A_UR: need for model transparency':
+        ['yes', 'yes', 'must', ''],
+    'A_UR: Availability of a well documented library':
+        ['', '', '', 'yes'],
+    'A_UR: Computer operating system':
+        ['', '', '', ''],
+    'A_Hardware: Number of workers/kernels for parallel computing':
+        ['', '', '', ''],
+    'A_Production application area':
+        ['', '', '', ''],  # 'Predictive Quality'
+    'A_Number of maximum function evaluations/ trials budget':
+        ['', '', '', ''],
+    'A_Running time per trial [s]':
+        ['', '', '', ''],
+    'A_Total Computing Time [s]':
+        ['7200.0:172800', '>172800', '7200.0:172800', '7200.0:172800'],  # >172800, '7200.0:172800'
+    'A_Machine Learning Algorithm':
+        ['XGBoost', 'XGBoost', 'XGBoost', 'XGBoost'],
+    'A_Obtainability of good approximate':
+        ['', '', '', ''],
+    'A_Supports parallel evaluations':
+        ['', '', '', ''],
+    'A_Dimensionality of HPs':
+        ['', '', '', ''],
+    'A_Conditional HP space':
+        ['', '', '', 'yes'],
+    'A_HP datatypes':
+        ['', '', '', ''],
+    'A_Availability of a warm-start HP configuration':
+        ['', '', '', ''],
+    'A_Obtainability of gradients':
+        ['', '', '', ''],
+    'A_Input Data':
+        ['', '', '', ''],  # Image data
+    'A_#Instances training dataset':
+        ['', '', '', ''],
+    'A_Ratio training to test dataset':
+        ['', '', '', ''],
+    'A_Noise in dataset':
+        ['', '', '', ''],   # yes
+    'A_Training Technique':
+        ['Offline', 'Offline', 'Offline', 'Offline'],   # Offline
+    'A_ML task':
+        ['Multiclass Classification', 'Multiclass Classification', 'Multiclass Classification', 'Multiclass Classification'],   # Multiclass Classification
+    'A_Detailed ML task':
+        ['', '', '', ''],   # Image Recognition
+}
+
+# inputs HPO BeliefRuleBase_v12 - extreme input testing
+""" 1) no user input 
+    2) uncertain input: {'low': 0.5, 'medium': 0.5}
+    3) activation of a determined rule: is the outcome like the rule?
+    3) activation of no rule by unknown input:
+    4) activation of the knock-out rule
+    """
+inputs_HPO_BRB_v13 = {
+    'A_UR: quality demands':
+        ['', '', {'low': 1.0, 'medium': 1.0, 'high': 1.0}, 'high'],
+    'A_User\'s programming ability':
+        ['', {'low': 0.5, 'medium': 0.5}, '', ''],
+    'A_UR: need for model transparency':
+        ['', '', '', ''],
+    'A_UR: Availability of a well documented library':
+        ['', '', '', ''],
+    'A_UR: Computer operating system':
+        ['', '', '', ''],
+    'A_Hardware: Number of workers/kernels for parallel computing':
+        ['', '', '', 'yes'],
+    'A_Production application area':
+        ['', 'Predictive Quality', '', ''],  # 'Predictive Quality'
+    'A_Number of maximum function evaluations/ trials budget':
+        ['', '', '', ''],
+    'A_Running time per trial [s]':
+        ['', '', '', ''],
+    'A_Total Computing Time [s]':
+        ['', '<7200', '', '7200.0:172800'],  # >172800, '7200.0:172800'
+    'A_Machine Learning Algorithm':
+        ['', 'XGBoost', '', ''],
+    'A_Obtainability of good approximate':
+        ['', '', '', ''],
+    'A_Supports parallel evaluations':
+        ['', '', '', ''],
+    'A_Dimensionality of HPs':
+        ['', '', '', ''],
+    'A_Conditional HP space':
+        ['', '', '', 'yes'],
+    'A_HP datatypes':
+        ['', '', '', ''],
+    'A_Availability of a warm-start HP configuration':
+        ['', '', '', ''],
+    'A_Obtainability of gradients':
+        ['', '', '', ''],
+    'A_Input Data':
+        ['', '', '', ''],  # Image data
+    'A_#Instances training dataset':
+        ['', '', '', ''],
+    'A_Ratio training to test dataset':
+        ['', '', '', ''],
+    'A_Noise in dataset':
+        ['', '', '', ''],   # yes
+    'A_Training Technique':
+        ['', '', '', ''],   # offline
     'A_ML task':
         ['', '', '', ''],   # Multiclass Classification
     'A_Detailed ML task':
         ['', '', '', ''],   # Image Recognition
 }
 
-# inputs HPO BeliefRuleBase_v12
-inputs_HPO_BRB_v12 = {
-    'A_UR: quality demands':
-        ['', '', 'high', 'high'],
-    'A_User\'s programming ability':
-        ['low', 'low', 'high', ''],
-    'A_UR: need for model transparency':
-        ['yes', '', '', ''],
-    'A_UR: Availability of a well documented library':
-        ['yes', '', '', ''],
-    'A_UR: Computer operating system':
-        ['', '', '', ''],
-    'A_Hardware: Number of workers/kernels for parallel computing':
-        ['no', '', 'yes', 'yes'],
-    'A_Production application area':
-        ['Predictive Quality', 'Predictive Quality', 'Predictive Quality', ''],  #Predictive Quality
-    'A_Number of maximum function evaluations/ trials budget':
-        ['', '', '', ''],
-    'A_Running time per trial [s]':
-        ['', '', '', ''],
-    'A_Total Computing Time [s]':
-        ['>172800', '<7200', '>172800', '7200.0:172800'],
-    'A_Machine Learning Algorithm':
-        ['XGBoost', 'XGBoost', 'XGBoost', ''],
-    'A_Obtainability of good approximate':
-        ['', '', '', ''],
-    'A_Supports parallel evaluations':
-        ['', '', '', ''],
-    'A_Dimensionality of HPs':
-        ['', '', '', ''],
-    'A_Conditional HP space':
-        ['', '', '', 'yes'],
-    'A_HP datatypes':
-        ['', '', '', ''],
-    'A_Availability of a warm-start HP configuration':
-        ['', '', '', ''],
-    'A_Obtainability of gradients':
-        ['', '', '', ''],
-    'A_Input Data':
-        ['', '', '', ''],  # Image data
-    'A_#Instances training dataset':
-        ['', '', '', ''],
-    'A_Ratio training to test dataset':
-        ['', '', '', ''],
-    'A_Noise in dataset':
-        ['', '', '', ''], # yes
-    'A_Training Technique':
-        ['', '', '', ''], # offline
-    'A_ML task':
-        ['', '', '', ''],   # Multiclass Classification
-    'A_Detailed ML task':
-        ['', '', '', ''],   # Image Recognition
-}
 
-# inputs HPO BeliefRuleBase_v12
-inputs_HPO_BRB_v12 = {
-    'A_UR: quality demands':
-        ['', '', 'high', 'high'],
-    'A_User\'s programming ability':
-        ['low', 'low', 'high', ''],
-    'A_UR: need for model transparency':
-        ['yes', '', '', ''],
-    'A_UR: Availability of a well documented library':
-        ['yes', '', '', ''],
-    'A_UR: Computer operating system':
-        ['', '', '', ''],
-    'A_Hardware: Number of workers/kernels for parallel computing':
-        ['no', '', 'yes', 'yes'],
-    'A_Production application area':
-        ['Predictive Quality', 'Predictive Quality', 'Predictive Quality', ''],  #Predictive Quality
-    'A_Number of maximum function evaluations/ trials budget':
-        ['', '', '', ''],
-    'A_Running time per trial [s]':
-        ['', '', '', ''],
-    'A_Total Computing Time [s]':
-        ['>172800', '<7200', '>172800', '7200.0:172800'],
-    'A_Machine Learning Algorithm':
-        ['XGBoost', 'XGBoost', 'XGBoost', ''],
-    'A_Obtainability of good approximate':
-        ['', '', '', ''],
-    'A_Supports parallel evaluations':
-        ['', '', '', ''],
-    'A_Dimensionality of HPs':
-        ['', '', '', ''],
-    'A_Conditional HP space':
-        ['', '', '', 'yes'],
-    'A_HP datatypes':
-        ['', '', '', ''],
-    'A_Availability of a warm-start HP configuration':
-        ['', '', '', ''],
-    'A_Obtainability of gradients':
-        ['', '', '', ''],
-    'A_Input Data':
-        ['', '', '', ''],  # Image data
-    'A_#Instances training dataset':
-        ['', '', '', ''],
-    'A_Ratio training to test dataset':
-        ['', '', '', ''],
-    'A_Noise in dataset':
-        ['', '', '', ''], # yes
-    'A_Training Technique':
-        ['', '', '', ''], # offline
-    'A_ML task':
-        ['', '', '', ''],   # Multiclass Classification
-    'A_Detailed ML task':
-        ['', '', '', ''],   # Image Recognition
-}
 
 # inputs ML BeliefRuleBase_v5
 inputs_ML_BRB_v5 = {
@@ -692,7 +595,8 @@ inputs_ML_BRB_v5 = {
 }
 
 curdir_path = '/Users/philippnoodt/VirtualBox_VMs/Win10/Win10_SharedFolder/MA/coding/Bruno/git/brb/'
-filename =  'csv_HPO_BeliefRuleBase_wKO_v12.csv_RefVals_AntImp-1Mscaled.csv'
+filename = 'csv_HPO_BeliefRuleBase_wKO_v13.csv_RefVals_AntImp-1Mscaled.csv'
+            #'csv_HPO_BeliefRuleBase_wKO_v12.csv_RefVals_AntImp-1Mscaled.csv'
             #'csv_HPO_BeliefRuleBase_v12.csv_all_1.csv'
             #'csv_HPO_BeliefRuleBase_v12.csv_RefVals_AntImp-UVscaled.csv'
             #'csv_HPO_BeliefRuleBase_v12.csv_RefVals_AntImp-1Mscaled.csv'
@@ -705,7 +609,8 @@ if __name__ == "__main__":
                     #'csv_rulebases/csv_HPO_BeliefRuleBase_v11.csv_spec_refvals*ant_imp--scaled.csv',
                     antecedents_prefix='A_',
                     consequents_prefix='D_',
-                    deltas_prefix='del_')
+                    deltas_prefix='del_',
+                    thetas='thetas')
     print('Model created')
 
     # test with random, existing inputs
@@ -714,7 +619,7 @@ if __name__ == "__main__":
     # test with custom inputs
     # rec determines recommendation type: 'HPO technique' or 'ML algorithm'
     # show_top enables showing best top X of consequents: 'all' or integer value , show_top=10
-    custom_input(model, inputs_HPO_BRB_v12, rec='HPO technique', show_top='all')    # or 'ML algorithm'
+    custom_input(model, inputs_HPO_BRB_KO2_v13, rec='HPO technique', show_top='all')    # or 'ML algorithm'
     '''
     # create random test inputs using new referential values
     print('\nindividual test inputs')
