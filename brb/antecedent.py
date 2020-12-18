@@ -315,7 +315,10 @@ class CategoricalAntecedent(Antecedent):
         elif isinstance(X_i, str):
             match = float(X_i == A_i_k)
         elif isinstance(X_i, dict):
-            match = float(X_i[A_i_k])
+            try:
+                match = float(X_i[A_i_k])
+            except:
+                pass
 
         return match
 

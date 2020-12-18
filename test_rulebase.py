@@ -4,11 +4,20 @@ import numpy as np
 import pandas as pd
 from interval import interval, inf
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+import matplotlib.cm
+import matplotlib.colors
+import seaborn as sns
 from typing import List, Any
 from brb.brb import csv2BRB
 from brb.attr_input import AttributeInput
 import math
 
+mpl.rcParams['font.family'] = 'Arial'
+# 179c7d is IPTgreen
+palette = sns.light_palette("#179c7d", as_cmap=True)
+matplotlib.cm.register_cmap("IPTgreencmap", palette)
+sns.set_theme(style="whitegrid")
 
 def enter_custom_input(A_i, X_i):
     user_inputs = A_i.copy()
@@ -19,7 +28,7 @@ def enter_custom_input(A_i, X_i):
             user_inputs[idx] = 0
     return user_inputs
 
-def random_existing_input(model, num_runs, incomplete):
+def random_existing_input(model, num_runs, incomplete, rec):
     """Creates a random input using the referential
     values that are exisiting in the rule base.
 
@@ -98,12 +107,16 @@ def random_existing_input(model, num_runs, incomplete):
                           sorted(boxplot_data_place.items(), key=lambda i: sum(i[1]), reverse=False)}
 
     # plotting results in boxplot
-    complete = 'incomplete' if incomplete == True else 'complete'
-    title = '{} run(s) on a randomly created, {} input of existing values'.format(num_runs, complete)
-    boxplot_results(boxplot_data, title)
-    boxplot_results(boxplot_data_place, title)
+    if incomplete == 'True':
+        complete = 'incomplete'
+    else:
+        complete = int(incomplete*100)
 
-def custom_input(model, input):
+    title = '{} runs on a randomly created input of existing values. User specified {}% of the antecedents.'.format(num_runs, complete)
+    boxplot_results(boxplot_data, title, y='Final belief')
+    boxplot_results(boxplot_data_place, title, y='Average rank')
+
+def custom_input(model, input, rec, show_top):
     num_runs = 1
     res = []
     res_place = []
@@ -153,30 +166,66 @@ def custom_input(model, input):
 
     # plotting results in boxplot
     title = 'Custom input'
-    boxplot_custominputs_results(res, title)
+    boxplot_custominputs_results(res, title, 'Total belief', rec=rec, show_top=show_top)
     #boxplot_results(boxplot_data, title)
     #boxplot_results(boxplot_data_place, title)
 
-def boxplot_results(data: List[any], title):
+def boxplot_results(data: List[any], title, y, rec):
     _data = [np.asarray(results) for results in data.values()]
     _consequents = [key.split('_')[1] for key in data.keys()]
 
-    plt.boxplot(_data, labels=_consequents)
+    _dict = {y: [], rec:[]}
+    for key in data.keys():
+        for value in data[key]:
+            _dict[y].append(value)
+            _dict[rec].append(key.split('_')[1])
+    _df = pd.DataFrame.from_dict(_dict)
+
+    #plt.boxplot(_data, labels=_consequents)
     plt.title(title)
     plt.xticks(rotation=45, ha='right')
+
+    sns.boxplot(x=rec, y=y, data=_df, palette='IPTgreencmap')
     plt.tight_layout()
+
     plt.show()
 
-def boxplot_custominputs_results(data: List[any], title):
+def boxplot_custominputs_results(data: List[any], title, y, rec, show_top):
     sqrt = math.ceil(np.sqrt(len(data)))
     fig, axes = plt.subplots(sqrt, sqrt)
 
     for idx, result in enumerate(data):
+        _dict = {y: [], rec: []}
+        '''
+        if show_top == 'all':
+            _data = [np.asarray(result) for result in result.values()]
+            _consequents = [key.split('_')[1] for key in result.keys()]
+        else:
+            _data = [np.asarray(result) for result in result.values()][:show_top]
+            _consequents = [key.split('_')[1] for key in result.keys()][:show_top]
+        
+        for item in range(len(_data)):
+            _dict[y].append(_data[item].astype(float))
+            _dict[rec].append(_consequents[item])
+        _df = pd.DataFrame.from_dict(_dict)
+        '''
         _data = [np.asarray(result) for result in result.values()]
         _consequents = [key.split('_')[1] for key in result.keys()]
 
-        axes[math.floor(idx/sqrt), idx % sqrt].boxplot(_data)
-        axes[math.floor(idx/sqrt), idx % sqrt].set_xticklabels(labels=_consequents, rotation=45, ha='right')
+        for key in result.keys():
+            _dict[y].append(result[key])
+            _dict[rec].append(key.split('_')[1])
+        _df = pd.DataFrame.from_dict(_dict)
+        if show_top == 'all':
+            pass
+        else:
+            _df = _df[:show_top]
+            _consequents = _consequents[:show_top]
+        #axes[math.floor(idx/sqrt), idx % sqrt].boxplot(_data)
+        #axes[math.floor(idx/sqrt), idx % sqrt].set_xticklabels(labels=_consequents, rotation=45, ha='right')
+        sns.boxplot(ax=axes[math.floor(idx / sqrt), idx % sqrt], x=rec, y=y, data=_df, palette='IPTgreencmap')
+        axes[math.floor(idx/sqrt), idx % sqrt].set_xticklabels(labels=_consequents, rotation=45,
+                                                               ha='right', fontsize=8)
 
     fig.subplots_adjust(hspace=0.4)
     plt.tight_layout()
@@ -482,6 +531,60 @@ inputs_HPO_BRB_v11 = {
         ['', '', '', ''],   # Image Recognition
 }
 
+# inputs HPO BeliefRuleBase_v12
+inputs_HPO_BRB_v12 = {
+    'A_UR: quality demands':
+        ['', '', 'high', 'high'],
+    'A_User\'s programming ability':
+        ['low', 'low', 'high', ''],
+    'A_UR: need for model transparency':
+        ['yes', '', '', ''],
+    'A_UR: Availability of a well documented library':
+        ['yes', '', '', ''],
+    'A_UR: Computer operating system':
+        ['', '', '', ''],
+    'A_Hardware: Number of workers/kernels for parallel computing':
+        ['no', '', 'yes', 'yes'],
+    'A_Production application area':
+        ['Predictive Quality', 'Predictive Quality', 'Predictive Quality', ''],  #Predictive Quality
+    'A_Number of maximum function evaluations/ trials budget':
+        ['', '', '', ''],
+    'A_Running time per trial [s]':
+        ['', '', '', ''],
+    'A_Total Computing Time [s]':
+        ['>172800', '<7200', '>172800', '7200.0:172800'],
+    'A_Machine Learning Algorithm':
+        ['XGBoost', 'XGBoost', 'XGBoost', ''],
+    'A_Obtainability of good approximate':
+        ['', '', '', ''],
+    'A_Supports parallel evaluations':
+        ['', '', '', ''],
+    'A_Dimensionality of HPs':
+        ['', '', '', ''],
+    'A_Conditional HP space':
+        ['', '', '', 'yes'],
+    'A_HP datatypes':
+        ['', '', '', ''],
+    'A_Availability of a warm-start HP configuration':
+        ['', '', '', ''],
+    'A_Obtainability of gradients':
+        ['', '', '', ''],
+    'A_Input Data':
+        ['', '', '', ''],  # Image data
+    'A_#Instances training dataset':
+        ['', '', '', ''],
+    'A_Ratio training to test dataset':
+        ['', '', '', ''],
+    'A_Noise in dataset':
+        ['', '', '', ''], # yes
+    'A_Training Technique':
+        ['', '', '', ''], # offline
+    'A_ML task':
+        ['', '', '', ''],   # Multiclass Classification
+    'A_Detailed ML task':
+        ['', '', '', ''],   # Image Recognition
+}
+
 # inputs ML BeliefRuleBase_v5
 inputs_ML_BRB_v5 = {
     'A_UR: quality demands':
@@ -535,22 +638,29 @@ inputs_ML_BRB_v5 = {
 }
 
 curdir_path = '/Users/philippnoodt/VirtualBox_VMs/Win10/Win10_SharedFolder/MA/coding/Bruno/git/brb/'
+filename =  'csv_HPO_BeliefRuleBase_wKO_v12.csv_RefVals_AntImp-1Mscaled.csv'
+            #'csv_HPO_BeliefRuleBase_v12.csv_all_1.csv'
+            #'csv_HPO_BeliefRuleBase_v12.csv_RefVals_AntImp-UVscaled.csv'
+            #'csv_HPO_BeliefRuleBase_v12.csv_RefVals_AntImp-1Mscaled.csv'
 
 if __name__ == "__main__":
 
     # create model from rules.csv
-    model = csv2BRB('csv_rulebases/csv_ML_BeliefRuleBase_v5.csv_spec_refvals*ant_imp--scaled.csv',
-                    #'csv_rulebases/csv_HPO_BeliefRuleBase_v11.csv_spec_refvals*ant_imp--scaled.csv'
+    model = csv2BRB('csv_rulebases/' + filename,
+                    #'csv_rulebases/csv_ML_BeliefRuleBase_v5.csv_spec_refvals*ant_imp--scaled.csv',
+                    #'csv_rulebases/csv_HPO_BeliefRuleBase_v11.csv_spec_refvals*ant_imp--scaled.csv',
                     antecedents_prefix='A_',
                     consequents_prefix='D_',
                     deltas_prefix='del_')
     print('Model created')
 
     # test with random, existing inputs
-    random_existing_input(model, 100, incomplete=0.6)
+    #random_existing_input(model, 100, incomplete=0.5)
 
     # test with custom inputs
-    #custom_input(model, inputs_BRB_v11)
+    # rec determines recommendation type: 'HPO technique' or 'ML algorithm'
+    # show_top enables showing best top X of consequents: 'all' or integer value , show_top=10
+    custom_input(model, inputs_HPO_BRB_v12, rec='HPO technique', show_top='all')    # or 'ML algorithm'
     '''
     # create random test inputs using new referential values
     print('\nindividual test inputs')
