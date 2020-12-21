@@ -11,7 +11,7 @@ from sklearn.preprocessing import StandardScaler
 delta_type = 'ref_values * antecedent importance'    # 'all 1', 'ref_values * antecedent importance'
 scale_deltas = '1 mean'     # "1 mean", "unit variance", 'nope'
 
-filename = 'HPO_BeliefRuleBase_wKO_v13.csv'  #excel_rulebases/
+filename = 'ML_BeliefRuleBase_wKO_v6.csv'  #excel_rulebases/
 raw_filepath = os.path.join(os.curdir, 'excel_rulebases/' + filename)
 excel_rulebase = pd.read_csv(raw_filepath, sep=';', header=None)
 

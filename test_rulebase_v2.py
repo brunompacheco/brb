@@ -113,8 +113,8 @@ def random_existing_input(model, num_runs, incomplete, rec):
         complete = int(incomplete*100)
 
     title = '{} runs on a randomly created input of existing values. User specified {}% of the antecedents.'.format(num_runs, complete)
-    boxplot_results(boxplot_data, title, y='Final belief')
-    boxplot_results(boxplot_data_place, title, y='Average rank')
+    boxplot_results(boxplot_data, title, y='Final belief', rec=rec)
+    boxplot_results(boxplot_data_place, title, y='Average rank', rec=rec)
 
 def custom_input(model, input, rec, show_top):
     num_runs = 1
@@ -136,6 +136,7 @@ def custom_input(model, input, rec, show_top):
 
         # ordering starting with the highest values first
         results = {alg: results[alg] for alg in sorted(results, key=results.get, reverse=True)}
+        print(results)
         results_place = {alg: num + 1 for num, alg in enumerate(results.keys())}
         print(results_place)
         res.append(results)
@@ -174,7 +175,7 @@ def boxplot_results(data: List[any], title, y, rec):
     _data = [np.asarray(results) for results in data.values()]
     _consequents = [key.split('_')[1] for key in data.keys()]
 
-    _dict = {y: [], rec:[]}
+    _dict = {y: [], rec: []}
     for key in data.keys():
         for value in data[key]:
             _dict[y].append(value)
@@ -427,7 +428,7 @@ inputs_HPO_BRB_KO2_v13 = {
 }
 
 # inputs HPO BeliefRuleBase_v13 - TRANSPARENCY TESTING
-inputs_HPO_BRB_v13 = {
+inputs_HPO_BRB_TRANSPARENCY_v13 = {
     'A_UR: quality demands':
         ['', 'high', 'high', 'high'],
     'A_User\'s programming ability':
@@ -480,18 +481,17 @@ inputs_HPO_BRB_v13 = {
         ['', '', '', ''],   # Image Recognition
 }
 
-# inputs HPO BeliefRuleBase_v12 - extreme input testing
-""" 1) no user input 
-    2) uncertain input: {'low': 0.5, 'medium': 0.5}
-    3) activation of a determined rule: is the outcome like the rule?
-    3) activation of no rule by unknown input:
-    4) activation of the knock-out rule
+# inputs HPO BeliefRuleBase_v13 - extreme input testing
+""" 1) activation of an existing rule: is the outcome like the rule?
+    2) very generic input that does not match any rule: does the BRBES still provide a rec?
+    3) very specific input that does not match any rule: does the BRBES still provide a rec?
+    4) uncertain input: {'low': 0.5, 'medium': 0.5} does it work?
     """
-inputs_HPO_BRB_v13 = {
+inputs_HPO_BRB_EXTREMEINPUT_v13 = {
     'A_UR: quality demands':
-        ['', '', {'low': 1.0, 'medium': 1.0, 'high': 1.0}, 'high'],
+        ['high', '', '', 'high'],   # {'low': 1.0, 'medium': 1.0, 'high': 1.0}
     'A_User\'s programming ability':
-        ['', {'low': 0.5, 'medium': 0.5}, '', ''],
+        ['high', {'low': 0.5, 'medium': 0.5}, '', ''],
     'A_UR: need for model transparency':
         ['', '', '', ''],
     'A_UR: Availability of a well documented library':
@@ -501,29 +501,29 @@ inputs_HPO_BRB_v13 = {
     'A_Hardware: Number of workers/kernels for parallel computing':
         ['', '', '', 'yes'],
     'A_Production application area':
-        ['', 'Predictive Quality', '', ''],  # 'Predictive Quality'
+        ['Predictive Quality', '', '', ''],  # 'Predictive Quality'
     'A_Number of maximum function evaluations/ trials budget':
-        ['', '', '', ''],
+        ['>100', '', '', ''],
     'A_Running time per trial [s]':
         ['', '', '', ''],
     'A_Total Computing Time [s]':
-        ['', '<7200', '', '7200.0:172800'],  # >172800, '7200.0:172800'
+        ['1.0:86400', '<7200', '', '7200.0:172800'],  # >172800, '7200.0:172800'
     'A_Machine Learning Algorithm':
         ['', 'XGBoost', '', ''],
     'A_Obtainability of good approximate':
-        ['', '', '', ''],
+        ['no', '', '', ''],
     'A_Supports parallel evaluations':
-        ['', '', '', ''],
+        ['no', '', '', ''],
     'A_Dimensionality of HPs':
         ['', '', '', ''],
     'A_Conditional HP space':
         ['', '', '', 'yes'],
     'A_HP datatypes':
-        ['', '', '', ''],
+        ['[discrete, ordinal, nominal]', '', '', ''], # [discrete, ordinal, nominal]
     'A_Availability of a warm-start HP configuration':
         ['', '', '', ''],
     'A_Obtainability of gradients':
-        ['', '', '', ''],
+        ['no', '', '', ''],
     'A_Input Data':
         ['', '', '', ''],  # Image data
     'A_#Instances training dataset':
@@ -540,8 +540,13 @@ inputs_HPO_BRB_v13 = {
         ['', '', '', ''],   # Image Recognition
 }
 
+'''
+1.	Typical user input which perfectly matches an existing rule
+2.	Uncertain user input: does the BRBES provide a recommendation and is it sound?
+3.	Very generic input that does not perfectly match any rule in the knowledge base: does the BRBES still provide a sound recommendation?
+4.	Very specific input that does not perfectly match any rule in the knowledge base: does the BRBES still provide a sound recommendation?
 
-
+'''
 # inputs ML BeliefRuleBase_v5
 inputs_ML_BRB_v5 = {
     'A_UR: quality demands':
@@ -594,9 +599,110 @@ inputs_ML_BRB_v5 = {
         ['', '', '', ''],   # Image Recognition
 }
 
+# inputs ML BeliefRuleBase_v6
+inputs_ML_BRB_v6 = {
+    'A_UR: quality demands':
+        ['', '', 'high', 'high'],
+    'A_User\'s programming ability':
+        ['low', 'low', 'high', ''],
+    'A_UR: need for model transparency':
+        ['yes', '', '', ''],
+    'A_UR: robustness of the model':
+        ['', '', '', ''],
+    'A_UR: scalability of the model':
+        ['', '', '', ''],
+    'A_UR: Availability of a well documented library':
+        ['yes', '', '', ''],
+    'A_UR: HPO or use of default values?':
+        ['', '', '', ''],
+    'A_UR: Computer operating system':
+        ['', '', '', ''],
+    'A_Hardware: access to high performance computing':
+        ['no', '', 'yes', 'yes'],
+    'A_Production application area':
+        ['Predictive Quality', 'Predictive Quality', 'Predictive Quality', ''],  #Predictive Quality
+    'A_Number of maximum function evaluations/ trials budget':
+        ['', '', '', ''],
+    'A_Running time per trial [s]':
+        ['', '', '', ''],
+    'A_Number of kernels used':
+        ['', '', '', ''],
+    'A_Total Computing Time [s]':
+        ['>172800', '<7200', '>172800', '7200.0:172800'],
+    'A_Input Data':
+        ['', '', '', ''],  # Image data, Tabular data
+    'A_#Instances training dataset':
+        ['', '', '', ''],       # >1000000
+    'A_Ratio training to test dataset':
+        ['', '', '', ''],       # 2.0:9
+    'A_Feature datatypes':
+        ['', '', '', ''],   # [continuous, discrete, nominal, timestamp]
+    'A_Number of features':
+        ['', '', '', ''],      # <100
+    'A_Noise in dataset':
+        ['', '', '', ''],   # yes
+    'A_Training technique':
+        ['', '', '', ''],   # offline
+    'A_ML task':
+        ['Regression', 'Binary Classification', '', ''],   # 'Multiclass Classification', 'Binary Classification'
+    'A_Detailed ML task':
+        ['', '', '', ''],   # Image Recognition
+}
+
+# inputs ML BeliefRuleBase_v6 3 SCENARIOS
+inputs_ML_BRB_v6 = {
+    'A_UR: quality demands':
+        ['', '', 'high', ''],
+    'A_User\'s programming ability':
+        ['low', 'low', 'high', ''],
+    'A_UR: need for model transparency':
+        ['yes', '', '', ''],
+    'A_UR: robustness of the model':
+        ['', '', '', ''],
+    'A_UR: scalability of the model':
+        ['', '', '', ''],
+    'A_UR: Availability of a well documented library':
+        ['yes', '', '', ''],
+    'A_UR: HPO or use of default values?':
+        ['', 'Default values', '', ''],
+    'A_UR: Computer operating system':
+        ['', '', '', ''],
+    'A_Hardware: access to high performance computing':
+        ['no', 'yes', 'yes', ''],
+    'A_Production application area':
+        ['Predictive Quality', 'Predictive Quality', 'Predictive Quality', ''],  #Predictive Quality
+    'A_Number of maximum function evaluations/ trials budget':
+        ['', '', '', ''],
+    'A_Running time per trial [s]':
+        ['', '', '', ''],
+    'A_Number of kernels used':
+        ['1', '8', '8', ''],
+    'A_Total Computing Time [s]':
+        ['<3600', '>172800', '>172800', ''],
+    'A_Input Data':
+        ['Tabular data', 'Tabular data', 'Tabular data', ''],  # Image data, Tabular data
+    'A_#Instances training dataset':
+        ['35400', '35400', '35400', ''],       # >1000000
+    'A_Ratio training to test dataset':
+        ['3.75', '3.75', '3.75', ''],       # 2.0:9
+    'A_Feature datatypes':
+        ['', '', '', ''],   # [continuous, discrete, nominal, timestamp]
+    'A_Number of features':
+        ['171', '171', '171', ''],      # <100
+    'A_Noise in dataset':
+        ['', '', '', ''],   # yes
+    'A_Training technique':
+        ['Offline', 'Offline', 'Offline', ''],   # Offline
+    'A_ML task':
+        ['Binary Classification', 'Binary Classification', 'Binary Classification', ''],   # 'Multiclass Classification', 'Binary Classification'
+    'A_Detailed ML task':
+        ['', '', '', ''],   # Image Recognition
+}
+
 curdir_path = '/Users/philippnoodt/VirtualBox_VMs/Win10/Win10_SharedFolder/MA/coding/Bruno/git/brb/'
 filename = 'csv_HPO_BeliefRuleBase_wKO_v13.csv_RefVals_AntImp-1Mscaled.csv'
-            #'csv_HPO_BeliefRuleBase_wKO_v12.csv_RefVals_AntImp-1Mscaled.csv'
+            #'csv_HPO_BeliefRuleBase_wKO_v13.csv_RefVals_AntImp-1Mscaled.csv'
+            #'csv_ML_BeliefRuleBase_wKO_v6.csv_RefVals_AntImp-1Mscaled.csv'
             #'csv_HPO_BeliefRuleBase_v12.csv_all_1.csv'
             #'csv_HPO_BeliefRuleBase_v12.csv_RefVals_AntImp-UVscaled.csv'
             #'csv_HPO_BeliefRuleBase_v12.csv_RefVals_AntImp-1Mscaled.csv'
@@ -614,12 +720,15 @@ if __name__ == "__main__":
     print('Model created')
 
     # test with random, existing inputs
-    #random_existing_input(model, 100, incomplete=0.5)
+    random_existing_input(model, 1000, incomplete=0.5, rec="ML algorithm")
 
     # test with custom inputs
-    # rec determines recommendation type: 'HPO technique' or 'ML algorithm'
-    # show_top enables showing best top X of consequents: 'all' or integer value , show_top=10
-    custom_input(model, inputs_HPO_BRB_KO2_v13, rec='HPO technique', show_top='all')    # or 'ML algorithm'
+    """
+    rec determines recommendation type: 'HPO technique' or 'ML algorithm'
+    show_top enables showing best top X of consequents: 'all' or integer value , show_top=10
+    """
+    #custom_input(model, inputs_ML_BRB_v6, rec='ML algorithm', show_top='all')    # or 'ML algorithm'
+
     '''
     # create random test inputs using new referential values
     print('\nindividual test inputs')
