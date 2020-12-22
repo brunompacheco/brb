@@ -3,15 +3,16 @@ import pandas as pd
 import os
 import math
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
 # ---------------------------------------------------------------------
 # choose type of antecedent weights
 # ['all 1', 'number of total ref_values', 'number of specific ref_values', 'antecedent importance',
 # 'number of specific ref_values * antecedent importance']
 delta_type = 'ref_values * antecedent importance'    # 'all 1', 'ref_values * antecedent importance'
-scale_deltas = '1 mean'     # "1 mean", "unit variance", 'nope'
+scale_deltas = '1 Mean global'     # "1 mean", "unit variance", 'nope', '1 Mean global'
 
-filename = 'ML_BeliefRuleBase_wKO_v6.csv'  #excel_rulebases/
+filename = 'ML_BeliefRuleBase_wKO_v9.csv'  #excel_rulebases/
 raw_filepath = os.path.join(os.curdir, 'excel_rulebases/' + filename)
 excel_rulebase = pd.read_csv(raw_filepath, sep=';', header=None)
 
@@ -24,19 +25,20 @@ def get_number_of_rules(excel_rulebase):
 def fill_in_antecedent_weights(rulebase, excel_rulebase, delta_type, scale_deltas,
                                num_rules, antecedents, antecedent_dict):
 
+    _rulebase = rulebase
     _ant_weight_strat = ''
     if delta_type == 'all 1':
         _ant_weight_strat = _ant_weight_strat + 'all_1'
         for rule in range(1, num_rules + 1):
             for ant in antecedents[2:]:
-                rulebase.loc[rule, 'del_' + ant] = 1
+                _rulebase.loc[rule, 'del_' + ant] = 1
 
     elif delta_type == 'number of antecedent occurrences':
         _ant_weight_strat = _ant_weight_strat + 'antecedent_occurrence'
         for rule in range(1, num_rules + 1):
             for ant in antecedents[2:]:
                 if pd.notnull(excel_rulebase.iloc[rule+5, antecedent_dict[ant][0]]):
-                    rulebase.loc[rule, 'del_' + ant] = 1/antecedent_dict[ant][1].sum()
+                    _rulebase.loc[rule, 'del_' + ant] = 1/antecedent_dict[ant][1].sum()
 
     elif delta_type == 'ref_values':
         _ant_weight_strat = _ant_weight_strat + 'RefVals'
@@ -45,13 +47,13 @@ def fill_in_antecedent_weights(rulebase, excel_rulebase, delta_type, scale_delta
                 ref_value = excel_rulebase.iloc[rule+4, antecedent_dict[ant][0]]
                 if pd.notnull(ref_value):
                     x = antecedent_dict[ant][1].get(ref_value)
-                    rulebase.loc[rule, 'del_' + ant] = 1/antecedent_dict[ant][1].get(ref_value)
+                    _rulebase.loc[rule, 'del_' + ant] = 1/antecedent_dict[ant][1].get(ref_value)
 
     elif delta_type == 'antecedent importance':
         _ant_weight_strat = _ant_weight_strat + 'AntImp'
         for rule in range(1, num_rules + 1):
             for ant in antecedents[2:]:
-                rulebase.loc[rule, 'del_' + ant] = 1 * float(antecedent_dict[ant][2])
+                _rulebase.loc[rule, 'del_' + ant] = 1 * float(antecedent_dict[ant][2])
 
     elif delta_type == 'ref_values * antecedent importance':
         _ant_weight_strat = _ant_weight_strat + 'RefVals_AntImp'
@@ -62,7 +64,7 @@ def fill_in_antecedent_weights(rulebase, excel_rulebase, delta_type, scale_delta
                     x = antecedent_dict[ant][1].get(ref_value)
                     a_i = float(antecedent_dict[ant][2])
                     denom = antecedent_dict[ant][1].get(ref_value)
-                    rulebase.loc[rule, 'del_' + ant] = float(antecedent_dict[ant][2]) \
+                    _rulebase.loc[rule, 'del_' + ant] = float(antecedent_dict[ant][2]) \
                                                        / antecedent_dict[ant][1].get(ref_value)
 
     if scale_deltas == "unit variance":
@@ -70,21 +72,30 @@ def fill_in_antecedent_weights(rulebase, excel_rulebase, delta_type, scale_delta
         scaler = StandardScaler(with_mean=False)
         for rule in range(1, num_rules + 1):
             start, end = 'del_' + antecedents[2], 'del_' + antecedents[-1]
-            deltas_rule = csv_rulebase.loc[rule, start:end].to_numpy().reshape(-1, 1)
+            deltas_rule = _rulebase.loc[rule, start:end].to_numpy().reshape(-1, 1)
             deltas_rule_scaled = scaler.fit_transform(deltas_rule).reshape(1, -1)
-            csv_rulebase.loc[rule, start:end] = deltas_rule_scaled
+            _rulebase.loc[rule, start:end] = deltas_rule_scaled
     elif scale_deltas == "1 mean":
         _ant_weight_strat = _ant_weight_strat + '-1Mscaled'
         for rule in range(1, num_rules + 1):
             start, end = 'del_' + antecedents[2], 'del_' + antecedents[-1]
-            deltas_rule = csv_rulebase.loc[rule, start:end].to_numpy().reshape(-1, 1)
+            deltas_rule = _rulebase.loc[rule, start:end].to_numpy().reshape(-1, 1)
             sum = np.nansum(np.array(deltas_rule.astype(float)))
             arr = ~np.isnan(np.array(deltas_rule.astype(float)))
             length = arr.sum() #.shape[0]
             deltas_rule_scaled = (deltas_rule*length/sum).reshape(1, -1)
-            csv_rulebase.loc[rule, start:end] = deltas_rule_scaled
+            _rulebase.loc[rule, start:end] = deltas_rule_scaled
+    elif scale_deltas == "1 Mean global": #normalize [0, 2]
+        _ant_weight_strat = _ant_weight_strat + '-1Mglobscaled'
+        minmaxscaler = MinMaxScaler(feature_range=(0, 2))
+        start, end = 'del_' + antecedents[2], 'del_' + antecedents[-1]
+        _df = _rulebase.loc[:, start:end]
+        _df = _df * np.sum(_df.count()) / np.nansum(_df)
+        _rulebase.loc[:, start:end] = _df
+        #_rulebase.loc[:, start:end] = minmaxscaler.fit_transform(_rulebase.loc[:, start:end])
+        #_rulebase.loc[:, start:end] = deltas_rule_scaled
 
-    return _ant_weight_strat
+    return _rulebase, _ant_weight_strat
 
 
 if __name__ == "__main__":
@@ -155,7 +166,7 @@ if __name__ == "__main__":
                 belief = belief.replace(',','.')
             csv_rulebase.loc[rule, 'D_' + con] = belief
 
-    ant_weight_strat = fill_in_antecedent_weights(csv_rulebase, excel_rulebase,
+    csv_rulebase, ant_weight_strat = fill_in_antecedent_weights(csv_rulebase, excel_rulebase,
                                                   delta_type, scale_deltas, num_rules,
                                                   antecedents, antecedent_dict)
 

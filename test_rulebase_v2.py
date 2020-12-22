@@ -195,27 +195,24 @@ def boxplot_custominputs_results(data: List[any], title, y, rec, show_top):
     sqrt = math.ceil(np.sqrt(len(data)))
     fig, axes = plt.subplots(sqrt, sqrt)
 
-    title_list = ['IF {(Transparency; yes)}',
+    title_HPO_KO1 = ['IF {(Transparency; yes)}',
                   'IF {(Transparency; must)}',
                   'IF {(Well-documented implementation; must)}',
                   'IF {(Conditionality; yes)}'
                   ]
+    title_HPO_KO4 = ['IF {(Transparency; must)}\nIF {(Well-documented implementation; must)}\nIF {(Conditionality; yes)}',
+                     'IF {(Transparency; must)}\nIF {(Well-documented implementation; must)}',
+                     'IF {(Transparency; must)}\nIF {(Conditionality; yes)}',
+                     'IF {(Conditionality; yes)}'
+                     ]
+    titles_ML_3UCs = ['Use case 1: Learning ML beginner',
+                      'Use case 2: Proof-of-concept',
+                      'Use case 3: High performance',
+                      '-'
+                      ]
 
     for idx, result in enumerate(data):
         _dict = {y: [], rec: []}
-        '''
-        if show_top == 'all':
-            _data = [np.asarray(result) for result in result.values()]
-            _consequents = [key.split('_')[1] for key in result.keys()]
-        else:
-            _data = [np.asarray(result) for result in result.values()][:show_top]
-            _consequents = [key.split('_')[1] for key in result.keys()][:show_top]
-        
-        for item in range(len(_data)):
-            _dict[y].append(_data[item].astype(float))
-            _dict[rec].append(_consequents[item])
-        _df = pd.DataFrame.from_dict(_dict)
-        '''
         _data = [np.asarray(result) for result in result.values()]
         _consequents = [key.split('_')[1] for key in result.keys()]
 
@@ -233,8 +230,8 @@ def boxplot_custominputs_results(data: List[any], title, y, rec, show_top):
         sns.boxplot(ax=axes[math.floor(idx / sqrt), idx % sqrt], x=rec, y=y, data=_df,
                     palette='IPTgreencmap')
         y_title_margin = 1.2
-        sns.set_theme(font="Arial", font_scale=6)
-        axes[math.floor(idx/sqrt), idx % sqrt].set_title(title_list[idx], fontsize=9) #, y=y_title_margin
+        #sns.set_theme(font="Arial", font_scale=6)
+        axes[math.floor(idx/sqrt), idx % sqrt].set_title(title_HPO_KO4[idx], fontsize=9) #, y=y_title_margin
         axes[math.floor(idx/sqrt), idx % sqrt].set_xticklabels(labels=_consequents, rotation=45,
                                                                ha='right', fontsize=7) #
         #axes[math.floor(idx / sqrt), idx % sqrt].set_yticklabels(plt.yticks(), fontsize=7)
@@ -405,6 +402,59 @@ inputs_HPO_BRB_KO2_v13 = {
         ['', '', '', ''],
     'A_Conditional HP space':
         ['', '', '', 'yes'],
+    'A_HP datatypes':
+        ['', '', '', ''],
+    'A_Availability of a warm-start HP configuration':
+        ['', '', '', ''],
+    'A_Obtainability of gradients':
+        ['', '', '', ''],
+    'A_Input Data':
+        ['', '', '', ''],  # Image data
+    'A_#Instances training dataset':
+        ['', '', '', ''],
+    'A_Ratio training to test dataset':
+        ['', '', '', ''],
+    'A_Noise in dataset':
+        ['', '', '', ''],   # yes
+    'A_Training Technique':
+        ['Offline', 'Offline', 'Offline', 'Offline'],   # Offline
+    'A_ML task':
+        ['Multiclass Classification', 'Multiclass Classification', 'Multiclass Classification', 'Multiclass Classification'],   # Multiclass Classification
+    'A_Detailed ML task':
+        ['', '', '', ''],   # Image Recognition
+}
+# inputs HPO BeliefRuleBase_v13 - KNOCK-OUT RULES TESTING 3
+inputs_HPO_BRB_KO3_v13 = {
+    'A_UR: quality demands':
+        ['high', 'high', 'high', 'high'],
+    'A_User\'s programming ability':
+        ['', '', '', ''],
+    'A_UR: need for model transparency':
+        ['must', 'must', 'must', ''],
+    'A_UR: Availability of a well documented library':
+        ['must', 'must', '', ''],
+    'A_UR: Computer operating system':
+        ['', '', '', ''],
+    'A_Hardware: Number of workers/kernels for parallel computing':
+        ['', '', '', ''],
+    'A_Production application area':
+        ['', '', '', ''],  # 'Predictive Quality'
+    'A_Number of maximum function evaluations/ trials budget':
+        ['', '', '', ''],
+    'A_Running time per trial [s]':
+        ['', '', '', ''],
+    'A_Total Computing Time [s]':
+        ['7200.0:172800', '7200.0:172800', '7200.0:172800', '7200.0:172800'],  # >172800, '7200.0:172800'
+    'A_Machine Learning Algorithm':
+        ['XGBoost', 'XGBoost', 'XGBoost', 'XGBoost'],
+    'A_Obtainability of good approximate':
+        ['', '', '', ''],
+    'A_Supports parallel evaluations':
+        ['', '', '', ''],
+    'A_Dimensionality of HPs':
+        ['', '', '', ''],
+    'A_Conditional HP space':
+        ['yes', '', 'yes', 'yes'],
     'A_HP datatypes':
         ['', '', '', ''],
     'A_Availability of a warm-start HP configuration':
@@ -650,19 +700,19 @@ inputs_ML_BRB_v6 = {
 }
 
 # inputs ML BeliefRuleBase_v6 3 SCENARIOS
-inputs_ML_BRB_v6 = {
+inputs_ML_BRB_3UCs_v6 = {
     'A_UR: quality demands':
         ['', '', 'high', ''],
     'A_User\'s programming ability':
-        ['low', 'low', 'high', ''],
+        ['low', 'medium', 'high', ''],
     'A_UR: need for model transparency':
-        ['yes', '', '', ''],
+        ['must', '', '', ''],    # 'must'
     'A_UR: robustness of the model':
         ['', '', '', ''],
     'A_UR: scalability of the model':
         ['', '', '', ''],
     'A_UR: Availability of a well documented library':
-        ['yes', '', '', ''],
+        ['yes', '', '', ''],    # 'must'
     'A_UR: HPO or use of default values?':
         ['', 'Default values', '', ''],
     'A_UR: Computer operating system':
@@ -678,17 +728,17 @@ inputs_ML_BRB_v6 = {
     'A_Number of kernels used':
         ['1', '8', '8', ''],
     'A_Total Computing Time [s]':
-        ['<3600', '>172800', '>172800', ''],
+        ['>172800', '<3600', '>172800', ''],
     'A_Input Data':
         ['Tabular data', 'Tabular data', 'Tabular data', ''],  # Image data, Tabular data
     'A_#Instances training dataset':
         ['35400', '35400', '35400', ''],       # >1000000
     'A_Ratio training to test dataset':
-        ['3.75', '3.75', '3.75', ''],       # 2.0:9
+        ['4.0', '4.0', '4.0', ''],       # 2.0:9
     'A_Feature datatypes':
-        ['', '', '', ''],   # [continuous, discrete, nominal, timestamp]
+        ['[continuous, discrete, nominal]', '[continuous, discrete, nominal]', '[continuous, discrete, nominal]', ''],   # [continuous, discrete, nominal, timestamp]
     'A_Number of features':
-        ['171', '171', '171', ''],      # <100
+        ['11', '11', '11', ''],      # <100
     'A_Noise in dataset':
         ['', '', '', ''],   # yes
     'A_Training technique':
@@ -700,7 +750,7 @@ inputs_ML_BRB_v6 = {
 }
 
 curdir_path = '/Users/philippnoodt/VirtualBox_VMs/Win10/Win10_SharedFolder/MA/coding/Bruno/git/brb/'
-filename = 'csv_HPO_BeliefRuleBase_wKO_v13.csv_RefVals_AntImp-1Mscaled.csv'
+filename = 'csv_ML_BeliefRuleBase_wKO_v9.csv_RefVals_AntImp-1Mglobscaled.csv'
             #'csv_HPO_BeliefRuleBase_wKO_v13.csv_RefVals_AntImp-1Mscaled.csv'
             #'csv_ML_BeliefRuleBase_wKO_v6.csv_RefVals_AntImp-1Mscaled.csv'
             #'csv_HPO_BeliefRuleBase_v12.csv_all_1.csv'
@@ -720,14 +770,14 @@ if __name__ == "__main__":
     print('Model created')
 
     # test with random, existing inputs
-    random_existing_input(model, 1000, incomplete=0.5, rec="ML algorithm")
+    #random_existing_input(model, 10, incomplete=0.5, rec="ML algorithm")
 
     # test with custom inputs
     """
     rec determines recommendation type: 'HPO technique' or 'ML algorithm'
     show_top enables showing best top X of consequents: 'all' or integer value , show_top=10
     """
-    #custom_input(model, inputs_ML_BRB_v6, rec='ML algorithm', show_top='all')    # or 'ML algorithm'
+    custom_input(model, inputs_ML_BRB_3UCs_v6, rec='ML algorithm', show_top=11)    # or 'ML algorithm', 'HPO technique', 'all'
 
     '''
     # create random test inputs using new referential values
