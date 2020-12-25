@@ -11,8 +11,9 @@ from sklearn.preprocessing import MinMaxScaler
 # 'number of specific ref_values * antecedent importance']
 delta_type = 'ref_values * antecedent importance'    # 'all 1', 'ref_values * antecedent importance'
 scale_deltas = '1 Mean global'     # "1 mean", "unit variance", 'nope', '1 Mean global'
+time_deltas = None        # 'use 1.0', 'use 0.33333', None
 
-filename = 'ML_BeliefRuleBase_wKO_v9.csv'  #excel_rulebases/
+filename = 'HPO_BeliefRuleBase_wKO_v14.csv'  #excel_rulebases/
 raw_filepath = os.path.join(os.curdir, 'excel_rulebases/' + filename)
 excel_rulebase = pd.read_csv(raw_filepath, sep=';', header=None)
 
@@ -23,7 +24,7 @@ def get_number_of_rules(excel_rulebase):
     return num_rules
 
 def fill_in_antecedent_weights(rulebase, excel_rulebase, delta_type, scale_deltas,
-                               num_rules, antecedents, antecedent_dict):
+                               num_rules, antecedents, antecedent_dict, time_deltas):
 
     _rulebase = rulebase
     _ant_weight_strat = ''
@@ -94,6 +95,17 @@ def fill_in_antecedent_weights(rulebase, excel_rulebase, delta_type, scale_delta
         _rulebase.loc[:, start:end] = _df
         #_rulebase.loc[:, start:end] = minmaxscaler.fit_transform(_rulebase.loc[:, start:end])
         #_rulebase.loc[:, start:end] = deltas_rule_scaled
+
+    if time_deltas == 'use 0.33333':
+        _ant_weight_strat = _ant_weight_strat + '-TIME1'
+        cols = ['del_' + 'Number of maximum function evaluations/ trials budget',
+                'del_' + 'Running time per trial [s]', 'del_' + 'Total Computing Time [s]']
+        _rulebase[_rulebase.loc[:, cols].notnull()] = 0.33333
+    elif time_deltas == 'use 1.0':
+        _ant_weight_strat = _ant_weight_strat + '-TIME1'
+        cols = ['del_' + 'Number of maximum function evaluations/ trials budget',
+                'del_' + 'Running time per trial [s]', 'del_' + 'Total Computing Time [s]']
+        _rulebase[_rulebase.loc[:, cols].notnull()] = 1.0
 
     return _rulebase, _ant_weight_strat
 
@@ -168,7 +180,7 @@ if __name__ == "__main__":
 
     csv_rulebase, ant_weight_strat = fill_in_antecedent_weights(csv_rulebase, excel_rulebase,
                                                   delta_type, scale_deltas, num_rules,
-                                                  antecedents, antecedent_dict)
+                                                  antecedents, antecedent_dict, time_deltas)
 
     rulebase_name = 'csv_' + filename + '_' + ant_weight_strat + '.csv'
     csv_rulebase.to_csv(rulebase_name)
