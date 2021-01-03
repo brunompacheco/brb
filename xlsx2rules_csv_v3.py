@@ -13,7 +13,7 @@ delta_type = 'ref_values * antecedent importance'    # 'all 1', 'ref_values * an
 scale_deltas = '1 Mean global'     # "1 mean", "unit variance", 'nope', '1 Mean global'
 time_deltas = None        # 'use 1.0', 'use 0.33333', None
 
-filename = 'HPO_BeliefRuleBase_wKO_v14.csv'  #excel_rulebases/
+filename = 'HPO_BeliefRuleBase_wKO_v13.csv'  #excel_rulebases/
 raw_filepath = os.path.join(os.curdir, 'excel_rulebases/' + filename)
 excel_rulebase = pd.read_csv(raw_filepath, sep=';', header=None)
 
