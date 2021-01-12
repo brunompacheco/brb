@@ -331,11 +331,6 @@ def boxplot_results(data: List[any], title, y, rec):
     plt.show()
 
 
-    #plt.xticks(rotation=45, ha='right')
-
-    #plt.tight_layout()
-    #plt.show()
-
 def boxplot_custominputs_results(data: List[any], title, y, rec, show_top):
     sqrt = math.ceil(np.sqrt(len(data)))
     fig, axes = plt.subplots(sqrt, sqrt)
