@@ -1,3 +1,41 @@
+"""Script to convert an Excel.csv into a csv that is readable for the BRBES.
+
+Inputs:
+- Knowledge base exported as .csv from Excel (saved in brb/excel_rulebases)
+    --> like HPO_BeliefRuleBase_wKO_v15.csv
+
+Outputs:
+- Knowledge base in .csv format that is readable by the BRBES
+    --> like csv_HPO_BeliefRuleBase_wKO_v16.csv_all_1.csv
+
+Functionalities:
+- Uses different strategies to create custom antecedent weights:
+    1) default -> 'all 1'
+    2) 1 divided by the number of times an antecedent is specified in the rulebase -> 'number of antecedent occurrences'
+    3) fixed antecedent weights for all rules -> 'antecedent importance'
+        (the antecedent importances have to be specified in the excel knowledge base)
+    4) 1 divided by the number of occurences of the specific ref_value in one antecedent -> 'ref_values'
+    5) mix of 2) and 3) -> 'ref_values * antecedent importance'
+
+- Possibilites to scale the resulting antecedent weights:
+    1) do not scale -> 'nope'
+    2) locally scale each rule to 1-mean -> '1 mean'
+    3) scale to unit variance -> 'unit variance'
+    4) globally scale rulebase to 1-mean -> '1 mean global'
+
+- Individually set the time-related antecedent weights:
+    1) leave unchanged -> None
+    2) set all antecedent weights to 1.0 -> 'use 1.0'
+    3) set all antecedent weights to 0.33333 -> 'use 0.33333'
+
+--------------------
+Guide:
+1) specify name of excel rulebase to use
+2) specify antecedent weight strategies and scale method
+3) run
+4) csv is saved in the brb directory and should be moved into the brb/csv_rulebases to be used in test_rulebase_v2.py
+"""
+
 import numpy as np
 import pandas as pd
 import os
@@ -6,16 +44,16 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 
 # ---------------------------------------------------------------------
-# choose type of antecedent weights
-# ['all 1', 'number of total ref_values', 'number of specific ref_values', 'antecedent importance',
-# 'number of specific ref_values * antecedent importance']
-delta_type = 'ref_values * antecedent importance'    # 'all 1', 'ref_values * antecedent importance'
-scale_deltas = '1 Mean global'     # "1 mean", "unit variance", 'nope', '1 Mean global'
-time_deltas = None        # 'use 1.0', 'use 0.33333', None
-
-filename = 'HPO_BeliefRuleBase_wKO_v13.csv'  #excel_rulebases/
+# specify name of excel rulebase to use
+filename = 'HPO_BeliefRuleBase_wKO_v16.csv'
 raw_filepath = os.path.join(os.curdir, 'excel_rulebases/' + filename)
 excel_rulebase = pd.read_csv(raw_filepath, sep=';', header=None)
+
+# choose type of antecedent weights
+delta_type = 'all 1'    # 'all 1', 'number of antecedent occurrences', 'ref_values', 'antecedent importance', 'ref_values * antecedent importance'
+scale_deltas = 'nope'     # "1 mean", "unit variance", 'nope', '1 mean global'
+time_deltas = None        # 'use 1.0', 'use 0.33333', None
+
 
 def get_number_of_rules(excel_rulebase):
     num_rules = 1
@@ -68,6 +106,8 @@ def fill_in_antecedent_weights(rulebase, excel_rulebase, delta_type, scale_delta
                     _rulebase.loc[rule, 'del_' + ant] = float(antecedent_dict[ant][2]) \
                                                        / antecedent_dict[ant][1].get(ref_value)
 
+# scaling the antecedent weights
+
     if scale_deltas == "unit variance":
         _ant_weight_strat = _ant_weight_strat + '-UVscaled'
         scaler = StandardScaler(with_mean=False)
@@ -86,7 +126,7 @@ def fill_in_antecedent_weights(rulebase, excel_rulebase, delta_type, scale_delta
             length = arr.sum() #.shape[0]
             deltas_rule_scaled = (deltas_rule*length/sum).reshape(1, -1)
             _rulebase.loc[rule, start:end] = deltas_rule_scaled
-    elif scale_deltas == "1 Mean global": #normalize [0, 2]
+    elif scale_deltas == "1 mean global": #normalize [0, 2]
         _ant_weight_strat = _ant_weight_strat + '-1Mglobscaled'
         minmaxscaler = MinMaxScaler(feature_range=(0, 2))
         start, end = 'del_' + antecedents[2], 'del_' + antecedents[-1]
@@ -95,6 +135,8 @@ def fill_in_antecedent_weights(rulebase, excel_rulebase, delta_type, scale_delta
         _rulebase.loc[:, start:end] = _df
         #_rulebase.loc[:, start:end] = minmaxscaler.fit_transform(_rulebase.loc[:, start:end])
         #_rulebase.loc[:, start:end] = deltas_rule_scaled
+
+# individually set the time-related antecedent weights
 
     if time_deltas == 'use 0.33333':
         _ant_weight_strat = _ant_weight_strat + '-TIME1'
