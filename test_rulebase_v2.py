@@ -1,3 +1,29 @@
+"""Script to create tests for knowledge bases.
+
+Inputs:
+- knowledge bases in .csv format
+- knowledge bases created with xlsx2rules_csv_v3.csv can directly be read by the BRBES
+
+Outputs:
+- none
+
+Functionalities:
+- Testing:
+    1) Automated execution testing
+    2) Custom input testing
+
+--------------------
+Guide:
+1) specify user inputs below: filename, recommendation, automated input testing or custom input testing information
+2a) if Automated input testing:
+    -> run
+2b) if Custom input testing:
+    -> create custom input
+    -> specify the custom input as input for the custom_input(..) in main()
+3) wait for plots
+"""
+
+
 import os
 import random
 import numpy as np
@@ -14,6 +40,22 @@ from brb.brb import csv2BRB
 from brb.attr_input import AttributeInput
 import math
 
+# ---------------------------------------------------------------------
+# User inputs
+curdir_path = '/Users/philippnoodt/VirtualBox_VMs/Win10/Win10_SharedFolder/MA/coding/Bruno/git/brb/'
+filename = 'csv_HPO_BeliefRuleBase_wKO_v16.csv_RefVals_AntImp-1Mglobscaled.csv'
+recommendation = 'HPO technique'    # 'ML algorithm'
+
+# Automated execution testing
+runs = 1000
+incompleteness = 0.5
+
+# Custom input testing
+num_algs_in_plot = 'all'    # enables showing best top X of consequents: 'all' or integer value: num_algs_in_plot=10
+
+
+# ---------------------------------------------------------------------
+# plot settings
 mpl.rcParams['font.family'] = 'Arial'
 # 179c7d is IPTgreen
 palette = sns.light_palette("#179c7d", as_cmap=True)
@@ -31,7 +73,7 @@ def enter_custom_input(A_i, X_i):
 
 def random_existing_input(model, num_runs, incomplete, rec):
     """Creates a random input using the referential
-    values that are exisiting in the rule base.
+    values that are existing in the rule base.
 
     Args:
         model: model to create input from.
@@ -117,7 +159,7 @@ def random_existing_input(model, num_runs, incomplete, rec):
     boxplot_results(boxplot_data, title, y='Final belief', rec=rec)
     boxplot_results(boxplot_data_place, title, y='Average rank', rec=rec)
 
-def custom_input(model, input, rec, show_top, brokenaxes):
+def custom_input(model, input, rec, show_top):
     num_runs = 1
     res = []
     res_place = []
@@ -168,11 +210,7 @@ def custom_input(model, input, rec, show_top, brokenaxes):
 
     # plotting results in boxplot
     title = 'Custom input'
-    if brokenaxes:
-        #boxplot_custominputs_results_brokenaxes(res, title, 'Total belief', rec=rec, show_top=show_top, brokenaxes=brokenaxes)
-        boxplot_results(res, title, 'Total belief', rec=rec, show_top=show_top)
-    else:
-        boxplot_custominputs_results(res, title, 'Total belief', rec=rec, show_top=show_top)
+    boxplot_custominputs_results(res, title, 'Total belief', rec=rec, show_top=show_top)
     #boxplot_results(boxplot_data, title)
     #boxplot_results(boxplot_data_place, title)
 
@@ -269,48 +307,28 @@ def custom_input_KO(model, model_wKO, input, rec, show_top):
     #boxplot_results(boxplot_data, title)
     #boxplot_results(boxplot_data_place, title)
 
-def boxplot_results(data: List[any], title, y, rec, show_top):
+def boxplot_results(data: List[any], title, y, rec):
+    _data = [np.asarray(results) for results in data.values()]
+    _consequents = [key.split('_')[1] for key in data.keys()]
 
-    titles = [
-        'IF {(Transparency; must)}\nIF {(Well-documented implementation; must)}\nIF {(Conditionality; yes)}',
-        'IF {(Transparency; must)}\nIF {(Well-documented implementation; must)}',
-        'IF {(Transparency; must)}\nIF {(Conditionality; yes)}',
-        'IF {(Conditionality; yes)}'
-    ]
-    for idx, result in enumerate(data):
-
-        plt.title(title)
-        _dict = {y: [], rec: []}
-        _data = [np.asarray(result) for result in result.values()]
-        _consequents = [key.split('_')[1] for key in result.keys()]
-
-        for key in result.keys():
-            _dict[y].append(result[key])
+    _dict = {y: [], rec: []}
+    for key in data.keys():
+        for value in data[key]:
+            _dict[y].append(value)
             _dict[rec].append(key.split('_')[1])
-        _df = pd.DataFrame.from_dict(_dict)
-        if show_top == 'all':
-            pass
-        else:
-            _df = _df[:show_top]
-            _consequents = _consequents[:show_top]
-        # axes[math.floor(idx/sqrt), idx % sqrt].boxplot(_data)
-        # axes[math.floor(idx/sqrt), idx % sqrt].set_xticklabels(labels=_consequents, rotation=45, ha='right')
-        braxes = ba(ylims=((0, 0.001), (0.058, 0.06)))
-        braxes.sns.boxplot(x=rec, y=y, data=_df, palette='IPTgreencmap')
+    _df = pd.DataFrame.from_dict(_dict)
 
-        y_title_margin = 1.2
-        # sns.set_theme(font="Arial", font_scale=6)
-        braxes.set_title(titles[idx], fontsize=9)  # , y=y_title_margin
-        braxes.set_xticklabels(labels=_consequents, rotation=45,
-                                                                 ha='right', fontsize=7)  #
-        # axes[math.floor(idx / sqrt), idx % sqrt].set_yticklabels(plt.yticks(), fontsize=7)
-        braxes.set_xlabel('')
-        braxes.set_ylabel('Total belief', fontsize=9)
-        # sns.set_context("paper", rc={"font.size": 7, "axes.titlesize": 9, "axes.labelsize": 7})
+    #plt.boxplot(_data, labels=_consequents)
+    plt.title(title, fontsize=11)
+    plt.xticks(rotation=45, ha='right', fontsize=9)
 
-        #fig.subplots_adjust(top=0.95, bottom=0.16, left=0.12, right=0.95, hspace=0.72, wspace=0.4)
-        plt.tight_layout()
-        plt.show()
+    sns.boxplot(x=rec, y=y, data=_df, color="#179c7d")
+
+    plt.xlabel(xlabel=rec, fontsize=11)
+    plt.ylabel(ylabel=y, fontsize=11)
+    plt.tight_layout()
+
+    plt.show()
 
 
     #plt.xticks(rotation=45, ha='right')
@@ -325,8 +343,8 @@ def boxplot_custominputs_results(data: List[any], title, y, rec, show_top):
     ML_IT = False
     ML_3UCs = False
     HPO_KO = False
-    HPO_IT = True
-    HPO_3UCs = False
+    HPO_IT = False
+    HPO_3UCs = True
 
     if ML_IT:
         titles = ['Use case 1: Matching an existing rule',
@@ -486,9 +504,9 @@ def boxplot_custominputs_results(data: List[any], title, y, rec, show_top):
         plt.show()
 
     elif HPO_3UCs:
-        titles = ['Use case 1:\nRandom Forest, TCT <10min, 1 worker',
+        titles = ['Use case 1:\nRandom Forest, TCT 10min, 1 worker',
                   'Use case 2:\nRandom Forest, TCT 8h, 8 workers',
-                  'Use case 3:\nKNN, TCT >2h, transparency wished',
+                  'Use case 3:\nKNN, TCT 2h, transparency wished',
                   '-',
                   ]
         for idx, result in enumerate(data):
@@ -1402,13 +1420,13 @@ inputs_HPO_BRB_VAL_v16 = {
     'A_Running time per trial [s]':
         ['', '', '', ''],
     'A_Total Computing Time [s]':
-        ['<600', '28800', '>9600', ''],  # >172800, '7200.0:172800'
+        ['600', '28800', '>9600', ''],  # >172800, '7200.0:172800'
     'A_Machine Learning Algorithm':
         ['Random Forest', 'Random Forest', 'KNN', ''],
     'A_Obtainability of good approximate':
         ['', '', '', ''],
     'A_Supports parallel evaluations':
-        ['', 'yes', 'yes', ''],
+        ['yes', 'yes', 'yes', ''],
     'A_Dimensionality of HPs':
         ['6', '6', '5', ''],
     'A_Conditional HP space':
@@ -1693,108 +1711,73 @@ inputs_ML_BRB_3UCs_v10 = {
     'A_Detailed ML task':
         ['Part Failure', 'Part Failure', 'Part Failure', ''],   # Image Recognition
 }
+inputs_ML_BRB_3UCs_v10_2 = {
+    'A_UR: quality demands':
+        ['', '', 'high', ''],
+    'A_User\'s programming ability':
+        ['low', 'medium', 'high', ''],
+    'A_UR: need for model transparency':
+        ['must', '', '', ''],    # 'must'
+    'A_UR: robustness of the model':
+        ['', '', '', ''],
+    'A_UR: scalability of the model':
+        ['', '', '', ''],
+    'A_UR: Availability of a well documented library':
+        ['must', '', '', ''],    # 'must'
+    'A_UR: Use of default hyperparameter values?':
+        ['', 'yes', '', ''],
+    'A_UR: Computer operating system':
+        ['Linux', 'Linux', 'Linux', ''],
+    'A_Hardware: access to high performance computing':
+        ['no', 'yes', 'yes', ''],
+    'A_Production application area':
+        ['Predictive Quality', 'Predictive Quality', 'Predictive Quality', ''],  #Predictive Quality
+    'A_Number of maximum function evaluations/ trials budget':
+        ['', '1', '', ''],
+    'A_Running time per trial [s]':
+        ['', '', '', ''],
+    'A_Number of kernels used':
+        ['1', '8', '8', ''],
+    'A_Total Computing Time [s]':
+        ['3600', '', '28800', ''],
+    'A_Input Data':
+        ['Tabular data', 'Tabular data', 'Tabular data', ''],  # Image data, Tabular data
+    'A_#Instances training dataset':
+        ['35800', '35800', '35800', ''],       # >1000000
+    'A_Ratio training to test dataset':
+        ['2.355', '2.355', '2.355', ''],       # 2.0:9
+    'A_Feature datatypes':
+        ['[continuous, discrete, nominal]', '[continuous, discrete, nominal]', '[continuous, discrete, nominal]', ''],   # [continuous, discrete, nominal, timestamp]
+    'A_Number of features':
+        ['11', '11', '11', ''],      # <100
+    'A_Noise in dataset':
+        ['', '', '', ''],   # yes
+    'A_Training technique':
+        ['Offline', 'Offline', 'Offline', ''],   # Offline
+    'A_ML task':
+        ['Binary Classification', 'Binary Classification', 'Binary Classification', ''],   # 'Multiclass Classification', 'Binary Classification'
+    'A_Detailed ML task':
+        ['Part Failure', 'Part Failure', 'Part Failure', ''],   # Image Recognition
+}
 
-curdir_path = '/Users/philippnoodt/VirtualBox_VMs/Win10/Win10_SharedFolder/MA/coding/Bruno/git/brb/'
-filename_wKO = 'csv_HPO_BeliefRuleBase_wKO_v16.csv_RefVals_AntImp-1Mglobscaled.csv'
-filename =     'csv_HPO_BeliefRuleBase_wKO_v15.csv_RefVals_AntImp-1Mglobscaled.csv'
-            #'csv_ML_BeliefRuleBase_wKO_v9.csv_RefVals_AntImp-1Mglobscaled.csv'
-            #'csv_HPO_BeliefRuleBase_wKO_v13.csv_RefVals_AntImp-1Mscaled.csv'
-            #'csv_ML_BeliefRuleBase_wKO_v6.csv_RefVals_AntImp-1Mscaled.csv'
-            #'csv_HPO_BeliefRuleBase_v12.csv_all_1.csv'
-            #'csv_HPO_BeliefRuleBase_v12.csv_RefVals_AntImp-UVscaled.csv'
-            #'csv_HPO_BeliefRuleBase_v12.csv_RefVals_AntImp-1Mscaled.csv'
+
+
 
 if __name__ == "__main__":
 
     # create model from rules.csv
-    model_wKO = csv2BRB('csv_rulebases/' + filename_wKO,
-                    #'csv_rulebases/csv_ML_BeliefRuleBase_v5.csv_spec_refvals*ant_imp--scaled.csv',
-                    #'csv_rulebases/csv_HPO_BeliefRuleBase_v11.csv_spec_refvals*ant_imp--scaled.csv',
-                    antecedents_prefix='A_',
-                    consequents_prefix='D_',
-                    deltas_prefix='del_',
-                    thetas='thetas')
     model = csv2BRB('csv_rulebases/' + filename,
-                    # 'csv_rulebases/csv_ML_BeliefRuleBase_v5.csv_spec_refvals*ant_imp--scaled.csv',
-                    # 'csv_rulebases/csv_HPO_BeliefRuleBase_v11.csv_spec_refvals*ant_imp--scaled.csv',
                     antecedents_prefix='A_',
                     consequents_prefix='D_',
                     deltas_prefix='del_',
                     thetas='thetas')
     print('Model created')
 
-    # test with random, existing inputs
-    #random_existing_input(model, 1000, incomplete=0.5, rec="HPO technique")
+    # Automated execution testing
+    random_existing_input(model, num_runs=runs, incomplete=incompleteness, rec=recommendation)
 
-    # test with custom inputs
-    """
-    rec determines recommendation type: 'HPO technique' or 'ML algorithm'
-    show_top enables showing best top X of consequents: 'all' or integer value , show_top=10
-    """
-    custom_input(model_wKO, inputs_HPO_BRB_IT_v16, rec='HPO technique', show_top='all', brokenaxes=False)    # or 'ML algorithm', 'HPO technique', 'all'
-    #custom_input_KO(model, model_wKO, inputs_ML_BRB_IT_v9, rec='ML algorithm', show_top='all')  # or 'ML algorithm', 'HPO technique', 'all'
+    # Custom input testing
+    custom_input(model, input=inputs_HPO_BRB_VAL_v16, rec='HPO technique', show_top=num_algs_in_plot)    # or 'ML algorithm', 'HPO technique', 'all'
 
-    '''
-    # create random test inputs using new referential values
-    print('\nindividual test inputs')
-    custom_input(inputs)
-    '''
 
     print('success')
-
-'''
-
-# TODO: print instructions
-
-# get attributes possible input
-attr_values = dict()
-for U_i in model.U:
-    attr_values[U_i] = set()
-    for rule in model.rules:
-        if U_i in rule.A_values.keys():
-            A_i = rule.A_values[U_i]
-
-            # format string version
-            if isinstance(A_i, interval):
-                A_i = A_i[0]  # only first component is considered, always
-                if A_i[0] == -inf:
-                    A_i = '<{}'.format(A_i[-1])
-                elif A_i[1] == inf:
-                    A_i = '>{}'.format(A_i[0])
-                else:
-                    A_i = '{}:{}'.format(*A_i)
-            elif isinstance(A_i, set):
-                A_i = '{}:{}'.format(min(A_i), max(A_i))
-            else:
-                A_i = str(A_i)
-
-            assert isinstance(A_i, str)
-
-            attr_values[U_i].add(A_i)
-
-# get rule input
-print('\nPlease enter the antecedents values (examples between brackets)\n')
-attr_input = dict()
-for U_i, A_i in attr_values.items():
-    print('Input for {} {}:'.format(U_i, A_i))
-
-    attr_input[U_i] = input()
-
-X = AttributeInput(attr_input)
-
-belief_degrees = model.run(X)
-
-# Display rules and its activations with the results
-print('\nActivated Rules:')
-
-matching_degrees = [rule.get_matching_degree(X) for rule in model.rules]
-
-for rule, matching_degree in zip(model.rules, matching_degrees):
-    if matching_degree > 0:
-        print("[Matching Degree: {}] {}".format(matching_degree, rule))
-
-print('\nResult:')
-for D_j, beta_j in zip(model.D, belief_degrees):
-    print('\t{}: {}'.format(D_j, beta_j))
-
-'''
