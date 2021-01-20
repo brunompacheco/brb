@@ -79,7 +79,7 @@ class RuleBaseModel():
             beta: List[float],
             delta: Dict[str, float] = None,
             theta: float = 1,
-            matching_degree: Union[str, callable] = 'arithmetic'
+            matching_degree: Union[str, callable] = 'additive'
         ) -> Rule:
         """Adds a new rule to the model.
 

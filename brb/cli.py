@@ -35,7 +35,7 @@ def _main(rules, antecedent_prefix, consequent_prefix, deltas_prefix):
         consequents_prefix=consequent_prefix,
         deltas_prefix=deltas_prefix
     )
-    model = model.expand_rules(matching_method='geometric')
+    model = model.expand_rules(matching_method='multiplicative')
     print('Model created')
 
     # TODO: print instructions

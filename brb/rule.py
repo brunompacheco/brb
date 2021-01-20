@@ -28,8 +28,8 @@ class Rule():
         matching_degree: \phi. Defines how to calculate the matching degree for
         the rule. If `Callable`, must be a function that takes `delta`,
         and `alphas_i` (dictionary that maps antecedents to their matching
-        degree given input) as input. If string, must be either 'geometric'
-        (default) or 'arithmetic', which apply the respective weighted means.
+        degree given input) as input. If string, must be either 'multiplicative'
+        (default) or 'additive', which apply the respective weighted means.
     """
 
     def __init__(
@@ -38,7 +38,7 @@ class Rule():
             beta: List[float],
             delta: Dict[str, float] = None,
             theta: float = 1,
-            matching_degree: Union[str, Callable] = 'arithmetic'
+            matching_degree: Union[str, Callable] = 'additive'
         ):
         self.U = list(A_values.keys())
 
@@ -82,19 +82,19 @@ class Rule():
             for U_i in self.U
         }
 
-        if self.matching_degree == 'geometric':
-            return self._geometric_matching_degree(self.delta, alphas_i)
-        elif self.matching_degree == 'arithmetic':
-            return self._arithmetic_matching_degree(self.delta, alphas_i)
+        if self.matching_degree == 'multiplicative':
+            return self._multiplicative_matching_degree(self.delta, alphas_i)
+        elif self.matching_degree == 'additive':
+            return self._additive_matching_degree(self.delta, alphas_i)
         elif callable(self.matching_degree):
             return self.matching_degree(self.delta, alphas_i)
 
     @staticmethod
-    def _arithmetic_matching_degree(
+    def _additive_matching_degree(
             delta: Dict[str, float],
             alphas_i: Dict[str, float]
         ) -> float:
-        """Computes arithmetic average of the antecedents' matching degrees.
+        """Computes additive average of the antecedents' matching degrees.
         """
         norm_delta = {attr: d / sum(delta.values()) for attr, d
                       in delta.items()}
@@ -105,11 +105,11 @@ class Rule():
         return np.sum(weighted_alpha)
 
     @staticmethod
-    def _geometric_matching_degree(
+    def _multiplicative_matching_degree(
             delta: Dict[str, float],
             alphas_i: Dict[str, float]
         ) -> float:
-        """Computes geometric average of the antecedents' matching degrees.
+        """Computes multiplicative average of the antecedents' matching degrees.
         """
         norm_delta = {attr: d / max(delta.values()) for attr, d
                       in delta.items()}

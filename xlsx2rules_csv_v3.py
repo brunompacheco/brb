@@ -50,8 +50,8 @@ raw_filepath = os.path.join(os.curdir, 'excel_rulebases/' + filename)
 excel_rulebase = pd.read_csv(raw_filepath, sep=';', header=None)
 
 # choose type of antecedent weights
-delta_type = 'all 1'    # 'all 1', 'number of antecedent occurrences', 'ref_values', 'antecedent importance', 'ref_values * antecedent importance'
-scale_deltas = 'nope'     # "1 mean", "unit variance", 'nope', '1 mean global'
+delta_type = 'ref_values * antecedent importance'    # 'all 1', 'number of antecedent occurrences', 'ref_values', 'antecedent importance', 'ref_values * antecedent importance'
+scale_deltas = '1 mean global'     # "1 mean", "unit variance", 'nope', '1 mean global'
 time_deltas = None        # 'use 1.0', 'use 0.33333', None
 
 
