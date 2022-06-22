@@ -8,7 +8,7 @@ mccabe==0.6.1
 mkl-fft==1.1.0
 mkl-random==1.1.1
 mkl-service==2.3.0
-numpy==1.18.5
+numpy==1.22.0
 pandas==1.0.5
 pip==20.2.2
 pycodestyle==2.6.0
