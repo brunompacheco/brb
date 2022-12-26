@@ -20,5 +20,5 @@ scipy==1.5.0
 setuptools==49.2.0.post20200714
 six==1.15.0
 toml==0.10.1
-wheel==0.34.2
+wheel==0.38.1
 wrapt==1.11.2
