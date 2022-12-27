@@ -17,7 +17,7 @@ python-dateutil==2.8.1
 pytz==2020.1
 rope==0.17.0
 scipy==1.5.0
-setuptools==49.2.0.post20200714
+setuptools==65.5.1
 six==1.15.0
 toml==0.10.1
 wheel==0.34.2
